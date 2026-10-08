@@ -30,12 +30,12 @@ function strings(value: unknown, fallback: string[]) {
   return Array.isArray(value) && value.length ? value.map((item) => String(item)) : fallback;
 }
 
-function seo(value: unknown, fallback: { title: string; description: string; ogImage?: string }) {
+function seo(value: unknown, fallback: { title: string; description: string; ogImage?: string }, version?: unknown) {
   const doc = (value || {}) as Doc;
   return {
     title: text(doc.title, fallback.title),
     description: text(doc.description, fallback.description),
-    ogImage: text(doc.ogImage, fallback.ogImage || ""),
+    ogImage: sanityImageUrl(doc.ogImage, fallback.ogImage || "", version),
   };
 }
 
@@ -71,7 +71,7 @@ function mapHome(doc: Doc, fallback: HomePage): HomePage {
     : fallback.partners;
   return {
     ...fallback,
-    seo: seo(doc.seo, fallback.seo),
+    seo: seo(doc.seo, fallback.seo, doc._updatedAt),
     heroTitle: text(doc.heroTitle, fallback.heroTitle),
     heroLine1: text(doc.heroLine1, fallback.heroLine1),
     heroLine2: text(doc.heroLine2, fallback.heroLine2),
@@ -94,7 +94,7 @@ function mapAbout(doc: Doc, fallback: AboutPage): AboutPage {
     : fallback.capabilities;
   return {
     ...fallback,
-    seo: seo(doc.seo, fallback.seo),
+    seo: seo(doc.seo, fallback.seo, doc._updatedAt),
     heroTitle: text(doc.heroTitle, fallback.heroTitle),
     heroSubtitle: text(doc.heroSubtitle, fallback.heroSubtitle),
     heroSlides: mapSlides(doc.heroSlides, fallback.heroSlides, doc._updatedAt),
@@ -116,7 +116,7 @@ function mapAbout(doc: Doc, fallback: AboutPage): AboutPage {
 function mapApply(doc: Doc, fallback: ApplyPage): ApplyPage {
   return {
     ...fallback,
-    seo: seo(doc.seo, fallback.seo),
+    seo: seo(doc.seo, fallback.seo, doc._updatedAt),
     headline: text(doc.headline, fallback.headline),
     scholarship: text(doc.scholarship, fallback.scholarship),
     documentsTitle: text(doc.documentsTitle, fallback.documentsTitle),
@@ -133,7 +133,7 @@ function mapContact(doc: Doc, fallback: ContactPage): ContactPage {
   const labels = (doc.formLabels || {}) as Doc;
   return {
     ...fallback,
-    seo: seo(doc.seo, fallback.seo),
+    seo: seo(doc.seo, fallback.seo, doc._updatedAt),
     title: text(doc.title, fallback.title),
     intro: text(doc.intro, fallback.intro),
     callTitle: text(doc.callTitle, fallback.callTitle),
@@ -159,7 +159,7 @@ function mapCareers(doc: Doc, fallback: CareersPage): CareersPage {
     : fallback.courses;
   return {
     ...fallback,
-    seo: seo(doc.seo, fallback.seo),
+    seo: seo(doc.seo, fallback.seo, doc._updatedAt),
     heroTitle: text(doc.heroTitle, fallback.heroTitle),
     heroSubtitle: text(doc.heroSubtitle, fallback.heroSubtitle),
     heroCta: text(doc.heroCta, fallback.heroCta),
@@ -178,7 +178,7 @@ function mapCareers(doc: Doc, fallback: CareersPage): CareersPage {
 function mapSimplePage(doc: Doc, fallback: ExperiencePage): ExperiencePage {
   return {
     ...fallback,
-    seo: seo(doc.seo, fallback.seo),
+    seo: seo(doc.seo, fallback.seo, doc._updatedAt),
     title: text(doc.title, fallback.title),
     body: text(doc.body, fallback.body),
   };
@@ -193,7 +193,7 @@ function mapPostgraduate(doc: Doc, fallback: PostgraduatePage): PostgraduatePage
     : fallback.highlights;
   return {
     ...fallback,
-    seo: seo(doc.seo, fallback.seo),
+    seo: seo(doc.seo, fallback.seo, doc._updatedAt),
     title: text(doc.title, fallback.title),
     heroSubtitle: text(doc.heroSubtitle, fallback.heroSubtitle),
     heroSlides: mapSlides(doc.heroSlides, fallback.heroSlides, doc._updatedAt),
@@ -216,7 +216,7 @@ function mapGallery(doc: Doc, images: unknown, fallback: EventsPage): EventsPage
     : fallback.images;
   return {
     ...fallback,
-    seo: seo(doc.seo, fallback.seo),
+    seo: seo(doc.seo, fallback.seo, doc._updatedAt),
     title: text(doc.title, fallback.title),
     heroSlides: mapSlides(doc.heroSlides, fallback.heroSlides, doc._updatedAt),
     images: galleryImages.length ? galleryImages : fallback.images,
@@ -250,7 +250,7 @@ function mapSettings(doc: Doc, fallback: SiteSettings): SiteSettings {
     copyright: text(doc.copyright, fallback.copyright),
     credit: text(doc.credit, fallback.credit),
     mapEmbedUrl: text(doc.mapEmbedUrl, fallback.mapEmbedUrl),
-    defaultSeo: seo(doc.seo, fallback.defaultSeo),
+    defaultSeo: seo(doc.seo, fallback.defaultSeo, doc._updatedAt),
   };
 }
 

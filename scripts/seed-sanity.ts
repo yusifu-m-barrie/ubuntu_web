@@ -77,6 +77,14 @@ function imageRef(assetId: string | undefined, extra: Record<string, unknown> = 
   };
 }
 
+async function seoBlock(seo: { title: string; description: string; ogImage?: string }) {
+  return {
+    title: seo.title,
+    description: seo.description,
+    ogImage: imageRef(await uploadSrc(seo.ogImage)),
+  };
+}
+
 async function slideImages(slides: { src: string; alt: string }[]) {
   return Promise.all(
     slides.map(async (slide, index) =>
@@ -118,7 +126,7 @@ async function seed() {
     copyright: siteSettings.copyright,
     credit: siteSettings.credit,
     mapEmbedUrl: siteSettings.mapEmbedUrl,
-    seo: siteSettings.defaultSeo,
+    seo: await seoBlock(siteSettings.defaultSeo),
   });
 
   await client.createOrReplace({
@@ -139,7 +147,7 @@ async function seed() {
   await client.createOrReplace({
     _id: "homePage",
     _type: "homePage",
-    seo: homePage.seo,
+    seo: await seoBlock(homePage.seo),
     heroTitle: homePage.heroTitle,
     heroLine1: homePage.heroLine1,
     heroLine2: homePage.heroLine2,
@@ -176,7 +184,7 @@ async function seed() {
   await client.createOrReplace({
     _id: "aboutPage",
     _type: "aboutPage",
-    seo: aboutPage.seo,
+    seo: await seoBlock(aboutPage.seo),
     heroTitle: aboutPage.heroTitle,
     heroSubtitle: aboutPage.heroSubtitle,
     heroSlides: await slideImages(aboutPage.heroSlides),
@@ -198,7 +206,7 @@ async function seed() {
   await client.createOrReplace({
     _id: "applyPage",
     _type: "applyPage",
-    seo: applyPage.seo,
+    seo: await seoBlock(applyPage.seo),
     headline: applyPage.headline,
     scholarship: applyPage.scholarship,
     documentsTitle: applyPage.documentsTitle,
@@ -214,7 +222,7 @@ async function seed() {
   await client.createOrReplace({
     _id: "contactPage",
     _type: "contactPage",
-    seo: contactPage.seo,
+    seo: await seoBlock(contactPage.seo),
     title: contactPage.title,
     intro: contactPage.intro,
     callTitle: contactPage.callTitle,
@@ -226,7 +234,7 @@ async function seed() {
   await client.createOrReplace({
     _id: "careersPage",
     _type: "careersPage",
-    seo: careersPage.seo,
+    seo: await seoBlock(careersPage.seo),
     heroTitle: careersPage.heroTitle,
     heroSubtitle: careersPage.heroSubtitle,
     heroCta: careersPage.heroCta,
@@ -245,7 +253,7 @@ async function seed() {
   await client.createOrReplace({
     _id: "experiencePage",
     _type: "experiencePage",
-    seo: experiencePage.seo,
+    seo: await seoBlock(experiencePage.seo),
     title: experiencePage.title,
     body: experiencePage.body,
   });
@@ -253,7 +261,7 @@ async function seed() {
   await client.createOrReplace({
     _id: "eventsPage",
     _type: "eventsPage",
-    seo: eventsListPage.seo,
+    seo: await seoBlock(eventsListPage.seo),
     title: eventsListPage.title,
     body: eventsListPage.body,
   });
@@ -261,7 +269,7 @@ async function seed() {
   await client.createOrReplace({
     _id: "postgraduatePage",
     _type: "postgraduatePage",
-    seo: postgraduatePage.seo,
+    seo: await seoBlock(postgraduatePage.seo),
     title: postgraduatePage.title,
     heroSubtitle: postgraduatePage.heroSubtitle,
     heroSlides: await slideImages(postgraduatePage.heroSlides),
@@ -275,7 +283,7 @@ async function seed() {
   await client.createOrReplace({
     _id: "galleryPage",
     _type: "galleryPage",
-    seo: galleryPage.seo,
+    seo: await seoBlock(galleryPage.seo),
     title: galleryPage.title,
     heroSlides: await slideImages(galleryPage.heroSlides),
   });

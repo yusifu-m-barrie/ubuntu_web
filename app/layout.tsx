@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Source_Serif_4 } from "next/font/google";
 import { loadContent, siteUrl } from "@/lib/content";
-import "./globals.css";
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 const sans = DM_Sans({
   subsets: ["latin"],
@@ -46,8 +42,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
-      <body className="min-h-screen bg-cream font-sans antialiased">{children}</body>
+    <html lang="en" className={`${sans.variable} ${serif.variable}`} suppressHydrationWarning>
+      <body className="antialiased" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

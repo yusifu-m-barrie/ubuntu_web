@@ -1,4 +1,4 @@
-import { ImageSlider } from "@/components/sections/ImageSlider";
+import { CareersStory } from "@/components/sections/CareersStory";
 import { VideoHero } from "@/components/sections/VideoHero";
 import { CtaLink } from "@/components/ui/PageHero";
 import { loadContent, siteUrl } from "@/lib/content";
@@ -42,22 +42,12 @@ export default async function CareersRoute() {
         </div>
       </VideoHero>
 
-      <section className="bg-white py-16 lg:py-20">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 lg:grid-cols-2 lg:px-6">
-          <div className="animate-fade-up space-y-5 text-lg leading-relaxed text-muted md:text-xl">
-            {careers.intro.map((paragraph) => (
-              <p key={paragraph.slice(0, 28)}>{paragraph}</p>
-            ))}
-            <div className="rounded-3xl bg-[#f2f2f2] p-8">
-              <h2 className="font-serif text-3xl font-bold text-navy md:text-4xl">{careers.whyTitle}</h2>
-              <p className="mt-4 text-muted">{careers.whyText}</p>
-            </div>
-          </div>
-          <div className="animate-fade-up" style={{ animationDelay: "120ms" }}>
-            <ImageSlider slides={careers.slides} label="Ubuntu Afrika careers training photos" />
-          </div>
-        </div>
-      </section>
+      <CareersStory
+        paragraphs={careers.intro}
+        slides={careers.slides}
+        whyTitle={careers.whyTitle}
+        whyText={careers.whyText}
+      />
 
       <section id="courses" className="scroll-mt-24 bg-[#f2f2f2] py-16 lg:py-20">
         <div className="mx-auto max-w-6xl px-4 lg:px-6">

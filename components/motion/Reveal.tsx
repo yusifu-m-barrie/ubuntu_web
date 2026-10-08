@@ -26,8 +26,11 @@ export function Reveal({
       },
       { threshold: 0.14, rootMargin: "0px 0px -6% 0px" },
     );
-    observer.observe(node);
-    return () => observer.disconnect();
+    const frame = window.requestAnimationFrame(() => observer.observe(node));
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, []);
 
   return (

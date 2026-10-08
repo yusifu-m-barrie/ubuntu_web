@@ -14,14 +14,18 @@ export function VideoHero({
   posterAlt: string;
   children: ReactNode;
 }) {
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const [playVideo, setPlayVideo] = useState(false);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduceMotion(media.matches);
-    const onChange = () => setReduceMotion(media.matches);
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
+    const enable = () => setPlayVideo(!media.matches && window.innerWidth >= 640);
+    enable();
+    media.addEventListener("change", enable);
+    window.addEventListener("resize", enable);
+    return () => {
+      media.removeEventListener("change", enable);
+      window.removeEventListener("resize", enable);
+    };
   }, []);
 
   const src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`;
@@ -30,13 +34,12 @@ export function VideoHero({
     <section className="relative min-h-[70vh] overflow-hidden lg:min-h-[913px]">
       <div className="absolute inset-0 bg-navy">
         <Image src={poster} alt={posterAlt} fill priority sizes="100vw" className="object-cover object-center" />
-        {!reduceMotion ? (
-          <div className="video-cover absolute inset-0 hidden sm:block">
+        {playVideo ? (
+          <div className="video-cover absolute inset-0">
             <iframe
               src={src}
               title="Ubuntu Afrika careers video"
               allow="autoplay; encrypted-media"
-              allowFullScreen
               tabIndex={-1}
             />
           </div>

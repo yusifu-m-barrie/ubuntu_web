@@ -6,11 +6,12 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     staleTimes: {
-      dynamic: 30,
-      static: 180,
+      dynamic: 0,
+      static: 0,
     },
   },
   images: {
+    minimumCacheTTL: 0,
     remotePatterns: [
       { protocol: "https", hostname: "cdn.sanity.io" },
       { protocol: "https", hostname: "ubuntuafrika-sl.com" },

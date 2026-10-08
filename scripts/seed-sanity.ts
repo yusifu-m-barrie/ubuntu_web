@@ -38,11 +38,11 @@ function loadEnv() {
 loadEnv();
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-const token = process.env.SANITY_API_WRITE_TOKEN;
+const token = process.env.SANITY_API_WRITE_TOKEN || process.env.SANITY_API_READ_TOKEN;
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
 
 if (!projectId || projectId === "placeholder" || !token) {
-  console.error("Set NEXT_PUBLIC_SANITY_PROJECT_ID and SANITY_API_WRITE_TOKEN in .env.local before seeding.");
+  console.error("Set NEXT_PUBLIC_SANITY_PROJECT_ID and SANITY_API_WRITE_TOKEN (or SANITY_API_READ_TOKEN with Editor access) in .env.local before seeding.");
   process.exit(1);
 }
 

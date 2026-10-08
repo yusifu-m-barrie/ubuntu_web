@@ -2,6 +2,7 @@ import { getMigratedContent, type MigratedContent } from "@/content";
 import { sanityClient, sanityConfigured } from "@/lib/sanity/client";
 import { sanityImageUrl } from "@/lib/sanity/image";
 import { allContentQuery } from "@/lib/sanity/queries";
+import { unstable_noStore as noStore } from "next/cache";
 import type {
   AboutPage,
   AlumniRecord,
@@ -38,13 +39,13 @@ function seo(value: unknown, fallback: { title: string; description: string; ogI
   };
 }
 
-function mapSlides(raw: unknown, fallback: Slide[]): Slide[] {
+function mapSlides(raw: unknown, fallback: Slide[], version?: unknown): Slide[] {
   if (!Array.isArray(raw) || !raw.length) return fallback;
   const slides = raw
     .map((item, index) => {
       const slide = (item || {}) as Doc;
       return {
-        src: sanityImageUrl(slide, text(slide.src, fallback[index]?.src || "")),
+        src: sanityImageUrl(slide, text(slide.src, fallback[index]?.src || ""), version),
         alt: text(slide.alt, fallback[index]?.alt || ""),
       };
     })
@@ -57,14 +58,14 @@ function mapHome(doc: Doc, fallback: HomePage): HomePage {
     ? (doc.features as Doc[]).map((feature, index) => ({
         eyebrow: text(feature.eyebrow, fallback.features[index]?.eyebrow || ""),
         title: text(feature.title, fallback.features[index]?.title || ""),
-        image: sanityImageUrl(feature.image, text(feature.imageSrc, fallback.features[index]?.image || "")),
+        image: sanityImageUrl(feature.image, text(feature.imageSrc, fallback.features[index]?.image || ""), doc._updatedAt),
         imageAlt: text(feature.imageAlt, fallback.features[index]?.imageAlt || ""),
         imageOn: (feature.imageOn === "right" ? "right" : "left") as "left" | "right",
       }))
     : fallback.features;
   const partners = Array.isArray(doc.partners)
     ? (doc.partners as Doc[]).map((partner, index) => ({
-        src: sanityImageUrl(partner.image, text(partner.src, fallback.partners[index]?.src || "")),
+        src: sanityImageUrl(partner.image, text(partner.src, fallback.partners[index]?.src || ""), doc._updatedAt),
         alt: text(partner.alt, fallback.partners[index]?.alt || ""),
       }))
     : fallback.partners;
@@ -76,8 +77,8 @@ function mapHome(doc: Doc, fallback: HomePage): HomePage {
     heroLine2: text(doc.heroLine2, fallback.heroLine2),
     heroCtaLabel: text(doc.heroCtaLabel, fallback.heroCtaLabel),
     heroCtaHref: text(doc.heroCtaHref, fallback.heroCtaHref),
-    heroBackground: sanityImageUrl(doc.heroBackground, text(doc.heroBackgroundSrc, fallback.heroBackground)),
-    heroSlides: mapSlides(doc.heroSlides, fallback.heroSlides),
+    heroBackground: sanityImageUrl(doc.heroBackground, text(doc.heroBackgroundSrc, fallback.heroBackground), doc._updatedAt),
+    heroSlides: mapSlides(doc.heroSlides, fallback.heroSlides, doc._updatedAt),
     introTitle: text(doc.introTitle, fallback.introTitle),
     introText: text(doc.introText, fallback.introText),
     features: features.length ? features : fallback.features,
@@ -96,7 +97,7 @@ function mapAbout(doc: Doc, fallback: AboutPage): AboutPage {
     seo: seo(doc.seo, fallback.seo),
     heroTitle: text(doc.heroTitle, fallback.heroTitle),
     heroSubtitle: text(doc.heroSubtitle, fallback.heroSubtitle),
-    heroSlides: mapSlides(doc.heroSlides, fallback.heroSlides),
+    heroSlides: mapSlides(doc.heroSlides, fallback.heroSlides, doc._updatedAt),
     intro: strings(doc.intro, fallback.intro),
     aimTitle: text(doc.aimTitle, fallback.aimTitle),
     aimText: text(doc.aimText, fallback.aimText),
@@ -104,7 +105,7 @@ function mapAbout(doc: Doc, fallback: AboutPage): AboutPage {
     missionText: text(doc.missionText, fallback.missionText),
     keyAreasTitle: text(doc.keyAreasTitle, fallback.keyAreasTitle),
     keyAreas: strings(doc.keyAreas, fallback.keyAreas),
-    impactImage: sanityImageUrl(doc.impactImage, text(doc.impactImageSrc, fallback.impactImage)),
+    impactImage: sanityImageUrl(doc.impactImage, text(doc.impactImageSrc, fallback.impactImage), doc._updatedAt),
     impactImageAlt: text(doc.impactImageAlt, fallback.impactImageAlt),
     capabilities: capabilities.length ? capabilities : fallback.capabilities,
     teamTitle: text(doc.teamTitle, fallback.teamTitle),
@@ -124,7 +125,7 @@ function mapApply(doc: Doc, fallback: ApplyPage): ApplyPage {
     closingDate: text(doc.closingDate, fallback.closingDate),
     ctaLabel: text(doc.ctaLabel, fallback.ctaLabel),
     ctaMailto: text(doc.ctaMailto, fallback.ctaMailto),
-    heroImage: sanityImageUrl(doc.heroImage, text(doc.heroImageSrc, fallback.heroImage)),
+    heroImage: sanityImageUrl(doc.heroImage, text(doc.heroImageSrc, fallback.heroImage), doc._updatedAt),
   };
 }
 
@@ -164,13 +165,13 @@ function mapCareers(doc: Doc, fallback: CareersPage): CareersPage {
     heroCta: text(doc.heroCta, fallback.heroCta),
     heroCtaHref: text(doc.heroCtaHref, fallback.heroCtaHref),
     heroVideoId: text(doc.heroVideoId, fallback.heroVideoId),
-    heroPoster: sanityImageUrl(doc.heroPoster, text(doc.heroPosterSrc, fallback.heroPoster)),
+    heroPoster: sanityImageUrl(doc.heroPoster, text(doc.heroPosterSrc, fallback.heroPoster), doc._updatedAt),
     intro: strings(doc.intro, fallback.intro),
     whyTitle: text(doc.whyTitle, fallback.whyTitle),
     whyText: text(doc.whyText, fallback.whyText),
     coursesTitle: text(doc.coursesTitle, fallback.coursesTitle),
     courses: courses.length ? courses : fallback.courses,
-    slides: mapSlides(doc.slides, fallback.slides),
+    slides: mapSlides(doc.slides, fallback.slides, doc._updatedAt),
   };
 }
 
@@ -195,7 +196,7 @@ function mapPostgraduate(doc: Doc, fallback: PostgraduatePage): PostgraduatePage
     seo: seo(doc.seo, fallback.seo),
     title: text(doc.title, fallback.title),
     heroSubtitle: text(doc.heroSubtitle, fallback.heroSubtitle),
-    heroSlides: mapSlides(doc.heroSlides, fallback.heroSlides),
+    heroSlides: mapSlides(doc.heroSlides, fallback.heroSlides, doc._updatedAt),
     intro: strings(doc.intro, fallback.intro),
     highlights: highlights.length ? highlights : fallback.highlights,
     cohorts: strings(doc.cohorts, fallback.cohorts),
@@ -208,7 +209,7 @@ function mapGallery(doc: Doc, images: unknown, fallback: EventsPage): EventsPage
   const galleryImages = Array.isArray(images)
     ? (images as Doc[])
         .map((item, index) => ({
-          src: sanityImageUrl(item.image, text(item.src, fallback.images[index]?.src || "")),
+          src: sanityImageUrl(item.image, text(item.src, fallback.images[index]?.src || ""), item._updatedAt),
           alt: text(item.alt, fallback.images[index]?.alt || ""),
         }))
         .filter((item) => item.src)
@@ -217,7 +218,7 @@ function mapGallery(doc: Doc, images: unknown, fallback: EventsPage): EventsPage
     ...fallback,
     seo: seo(doc.seo, fallback.seo),
     title: text(doc.title, fallback.title),
-    heroSlides: mapSlides(doc.heroSlides, fallback.heroSlides),
+    heroSlides: mapSlides(doc.heroSlides, fallback.heroSlides, doc._updatedAt),
     images: galleryImages.length ? galleryImages : fallback.images,
   };
 }
@@ -234,8 +235,8 @@ function mapSettings(doc: Doc, fallback: SiteSettings): SiteSettings {
     companyName: text(doc.companyName, fallback.companyName),
     shortName: text(doc.shortName, fallback.shortName),
     tagline: text(doc.tagline, fallback.tagline),
-    logo: sanityImageUrl(doc.logo, text(doc.logoUrl, fallback.logo)),
-    favicon: sanityImageUrl(doc.favicon, text(doc.faviconUrl, fallback.favicon)),
+    logo: sanityImageUrl(doc.logo, text(doc.logoUrl, fallback.logo), doc._updatedAt),
+    favicon: sanityImageUrl(doc.favicon, text(doc.faviconUrl, fallback.favicon), doc._updatedAt),
     phoneFooter: text(doc.phoneFooter, fallback.phoneFooter),
     phoneContact: text(doc.phoneContact, fallback.phoneContact),
     emails: strings(doc.emails, fallback.emails),
@@ -259,7 +260,7 @@ function mapTeam(docs: Doc[], fallback: TeamMember[]): TeamMember[] {
     .map((doc, index) => ({
       name: text(doc.name, ""),
       role: text(doc.role, fallback[index]?.role || ""),
-      photo: sanityImageUrl(doc.photo, text(doc.photoUrl, fallback[index]?.photo || "")),
+      photo: sanityImageUrl(doc.photo, text(doc.photoUrl, fallback[index]?.photo || ""), doc._updatedAt),
       linkedin: doc.linkedin ? String(doc.linkedin) : fallback[index]?.linkedin,
     }))
     .filter((member) => member.name);
@@ -271,7 +272,7 @@ function mapTestimonials(docs: Doc[], fallback: Testimonial[]): Testimonial[] {
     quote: text(doc.quote, fallback[index]?.quote || ""),
     name: text(doc.name, fallback[index]?.name || ""),
     cohort: text(doc.cohort, fallback[index]?.cohort || ""),
-    image: sanityImageUrl(doc.image, text(doc.imageUrl, fallback[index]?.image || "")),
+    image: sanityImageUrl(doc.image, text(doc.imageUrl, fallback[index]?.image || ""), doc._updatedAt),
   }));
 }
 
@@ -280,7 +281,7 @@ function mapAlumni(docs: Doc[], fallback: AlumniRecord[]): AlumniRecord[] {
   return docs.map((doc, index) => ({
     name: text(doc.name, ""),
     cohort: text(doc.cohort, fallback[index]?.cohort || ""),
-    photo: sanityImageUrl(doc.photo, text(doc.photoUrl, fallback[index]?.photo || "")),
+    photo: sanityImageUrl(doc.photo, text(doc.photoUrl, fallback[index]?.photo || ""), doc._updatedAt),
     residence: text(doc.residence, fallback[index]?.residence || ""),
     birthPlace: text(doc.birthPlace, fallback[index]?.birthPlace || ""),
     familyPlace: text(doc.familyPlace, fallback[index]?.familyPlace || ""),
@@ -296,13 +297,14 @@ function mapAlumni(docs: Doc[], fallback: AlumniRecord[]): AlumniRecord[] {
 }
 
 export const loadContent = cache(async (): Promise<MigratedContent> => {
+  noStore();
   const fallback = getMigratedContent();
   if (!sanityConfigured || !sanityClient) {
     return fallback;
   }
 
   try {
-    const data = (await sanityClient.fetch(allContentQuery)) as Doc;
+    const data = (await sanityClient.fetch(allContentQuery, {}, { cache: "no-store", next: { tags: ["sanity"] } })) as Doc;
     return {
       ...fallback,
       settings: data.settings ? mapSettings(data.settings as Doc, fallback.settings) : fallback.settings,

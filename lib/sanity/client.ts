@@ -1,3 +1,4 @@
+import "server-only";
 import { createClient } from "next-sanity";
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "";
@@ -11,6 +12,9 @@ export const sanityClient = sanityConfigured
       projectId,
       dataset,
       apiVersion,
-      useCdn: true,
+      useCdn: false,
+      perspective: "published",
+      token: process.env.SANITY_API_READ_TOKEN,
+      stega: false,
     })
   : null;

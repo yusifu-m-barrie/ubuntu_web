@@ -1,8 +1,10 @@
+import { SanityLiveRefresh } from "@/components/SanityLiveRefresh";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { loadContent } from "@/lib/content";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const content = await loadContent();
@@ -15,6 +17,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       />
       <main>{children}</main>
       <SiteFooter settings={content.settings} />
+      <SanityLiveRefresh />
     </>
   );
 }

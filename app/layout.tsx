@@ -3,6 +3,9 @@ import { DM_Sans, Source_Serif_4 } from "next/font/google";
 import { loadContent, siteUrl } from "@/lib/content";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const sans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm",

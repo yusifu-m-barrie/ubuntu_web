@@ -6,6 +6,7 @@ import type {
   EventsPage,
   ExperiencePage,
   HomePage,
+  NavItem,
   PostgraduatePage,
   SiteSettings,
 } from "@/types/content";
@@ -55,7 +56,7 @@ export const siteSettings: SiteSettings = {
   },
 };
 
-export const navigation = [
+export const navigation: NavItem[] = [
   { label: "Home", href: "/" },
   {
     label: "About",

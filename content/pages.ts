@@ -76,7 +76,7 @@ export const navigation = [
     ],
   },
   { label: "Contact Us", href: "/contact" },
-  { label: "Apply Now", href: "/apply-now", accent: true },
+  { label: "Apply Now", href: "/apply", accent: true },
 ];
 
 export const homePage: HomePage = {
@@ -422,7 +422,7 @@ export const postgraduatePage: PostgraduatePage = {
   ],
   cohorts: ["2018 - 2019", "2021 - 2022", "2022 - 2023", "2023 - 2024", "2025 - 2026"],
   ctaLabel: "Apply Now",
-  ctaHref: "/apply-now",
+  ctaHref: "/apply",
 };
 
 export const galleryPage: EventsPage = {

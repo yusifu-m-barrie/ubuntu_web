@@ -10,6 +10,19 @@ const nextConfig: NextConfig = {
       static: 0,
     },
   },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
+  },
   images: {
     minimumCacheTTL: 0,
     remotePatterns: [
@@ -96,11 +109,14 @@ const nextConfig: NextConfig = {
       "/2023/02/23/hello-world",
     ];
 
-    return demoPaths.map((source) => ({
-      source,
-      destination: "/",
-      permanent: true,
-    }));
+    return [
+      { source: "/apply-now", destination: "/apply", permanent: true },
+      ...demoPaths.map((source) => ({
+        source,
+        destination: "/",
+        permanent: true,
+      })),
+    ];
   },
 };
 

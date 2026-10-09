@@ -58,7 +58,7 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
             Contact
           </Link>
           {" · "}
-          <Link href="/apply-now" prefetch className="hover:text-orange">
+          <Link href="/apply" prefetch className="hover:text-orange">
             Apply Now
           </Link>
         </p>

@@ -12,6 +12,7 @@ import type {
   EventsPage,
   ExperiencePage,
   HomePage,
+  NavItem,
   PostgraduatePage,
   SiteSettings,
   Slide,
@@ -21,6 +22,18 @@ import type {
 import { cache } from "react";
 
 type Doc = Record<string, unknown>;
+
+function portalHref(href: string) {
+  return href === "/apply-now" ? "/apply" : href;
+}
+
+function mapNavigation(items: NavItem[]): NavItem[] {
+  return items.map((item) => ({
+    ...item,
+    href: portalHref(item.href),
+    children: item.children?.map((child) => ({ ...child, href: portalHref(child.href) })),
+  }));
+}
 
 function text(value: unknown, fallback: string) {
   return value ? String(value) : fallback;
@@ -201,7 +214,7 @@ function mapPostgraduate(doc: Doc, fallback: PostgraduatePage): PostgraduatePage
     highlights: highlights.length ? highlights : fallback.highlights,
     cohorts: strings(doc.cohorts, fallback.cohorts),
     ctaLabel: text(doc.ctaLabel, fallback.ctaLabel),
-    ctaHref: text(doc.ctaHref, fallback.ctaHref),
+    ctaHref: portalHref(text(doc.ctaHref, fallback.ctaHref)),
   };
 }
 
@@ -308,10 +321,11 @@ export const loadContent = cache(async (): Promise<MigratedContent> => {
     return {
       ...fallback,
       settings: data.settings ? mapSettings(data.settings as Doc, fallback.settings) : fallback.settings,
-      navigation:
+      navigation: mapNavigation(
         Array.isArray((data.navigation as Doc | undefined)?.items) && ((data.navigation as Doc).items as unknown[]).length
-          ? ((data.navigation as Doc).items as MigratedContent["navigation"])
+          ? ((data.navigation as Doc).items as NavItem[])
           : fallback.navigation,
+      ),
       home: data.home ? mapHome(data.home as Doc, fallback.home) : fallback.home,
       about: data.about ? mapAbout(data.about as Doc, fallback.about) : fallback.about,
       apply: data.apply ? mapApply(data.apply as Doc, fallback.apply) : fallback.apply,

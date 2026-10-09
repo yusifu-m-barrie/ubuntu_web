@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/events",
     "/events-2",
     "/apply-now",
+    "/apply",
     "/contact",
   ];
   return pages.map((path) => ({

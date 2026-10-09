@@ -11,9 +11,11 @@
     "seed": "npx --yes tsx --env-file=.env.local scripts/seed-sanity.ts"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
     "@portabletext/react": "^3.2.1",
     "@sanity/image-url": "^1.1.0",
     "@sanity/vision": "^3.70.0",
+    "@vercel/blob": "^2.8.1",
     "lucide-react": "^0.468.0",
     "next": "^15.3.2",
     "next-sanity": "^9.8.51",
@@ -21,7 +23,8 @@
     "react-dom": "^19.0.0",
     "resend": "^4.1.2",
     "sanity": "^3.70.0",
-    "styled-components": "^6.1.14"
+    "styled-components": "^6.1.14",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

@@ -75,7 +75,7 @@ export default async function HomePage() {
         ctaLabel={home.heroCtaLabel}
         ctaHref={home.heroCtaHref}
         applyLabel="Apply Now"
-        applyHref="/apply-now"
+        applyHref="/apply"
         tagline={settings.tagline}
         background={home.heroBackground}
         slides={home.heroSlides}
@@ -125,7 +125,7 @@ export default async function HomePage() {
             ))}
           </div>
           <div className="mt-12 text-center">
-            <CtaLink href="/apply-now">Apply Now</CtaLink>
+            <CtaLink href="/apply">Apply Now</CtaLink>
           </div>
         </Reveal>
       </section>

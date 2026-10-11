@@ -35,12 +35,17 @@ function mapNavigation(items: NavItem[]): NavItem[] {
   }));
 }
 
+function brandAfrika(value: string) {
+  return value.replaceAll("Ubuntu Tech Africa", "Ubuntu Tech Afrika").replaceAll("Ubuntu Africa", "Ubuntu Afrika");
+}
+
 function text(value: unknown, fallback: string) {
-  return value ? String(value) : fallback;
+  return brandAfrika(value ? String(value) : fallback);
 }
 
 function strings(value: unknown, fallback: string[]) {
-  return Array.isArray(value) && value.length ? value.map((item) => String(item)) : fallback;
+  const list = Array.isArray(value) && value.length ? value.map((item) => String(item)) : fallback;
+  return list.map(brandAfrika);
 }
 
 function seo(value: unknown, fallback: { title: string; description: string; ogImage?: string }, version?: unknown) {

@@ -1,7 +1,7 @@
 import { fullName } from "@/lib/applications/reference";
 import type { ApplicationRecord } from "@/types/application";
 
-const BRAND = "Ubuntu Tech Africa";
+const BRAND = "Ubuntu Tech Afrika";
 
 function escapeHtml(value: string) {
   return value

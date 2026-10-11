@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Graduate/Postgraduate Programme Application",
     description:
-      "Apply to the Ubuntu Tech Africa graduate and postgraduate programme. Develop practical skills, gain professional experience, and join the Ubuntu Tech Africa team.",
+      "Apply to the Ubuntu Tech Afrika graduate and postgraduate programme. Develop practical skills, gain professional experience, and join the Ubuntu Tech Afrika team.",
     alternates: { canonical: siteUrl("/apply") },
   };
 }
@@ -24,8 +24,8 @@ export default async function ApplyLanding() {
   return (
     <>
       <PageHero
-        kicker="Ubuntu Tech Africa · Graduate/Postgraduate Programme"
-        title="Start Your Journey With Ubuntu Tech Africa"
+        kicker="Ubuntu Tech Afrika · Graduate/Postgraduate Programme"
+        title="Start Your Journey With Ubuntu Tech Afrika"
         subtitle={apply.scholarship || undefined}
       />
 
@@ -33,7 +33,7 @@ export default async function ApplyLanding() {
         <div>
           <p className="text-lg leading-relaxed text-muted">
             The programme provides graduates with an opportunity to develop practical skills, gain professional
-            experience, and potentially join the Ubuntu Tech Africa team.
+            experience, and potentially join the Ubuntu Tech Afrika team.
           </p>
           {apply.headline ? <p className="mt-4 text-sm text-navy">{apply.headline}</p> : null}
           <ApplyStartActions />
@@ -68,7 +68,7 @@ export default async function ApplyLanding() {
             <CheckCircle2 className="h-8 w-8 text-orange" aria-hidden />
             <h2 className="mt-4 font-serif text-xl text-navy">What to expect</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted">
-              Practical training, professional experience, and the chance to contribute to Ubuntu Tech Africa.
+              Practical training, professional experience, and the chance to contribute to Ubuntu Tech Afrika.
             </p>
           </article>
           <article className="rounded-2xl bg-cream p-6 ring-1 ring-navy/10">

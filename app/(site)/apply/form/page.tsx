@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Application form",
-    description: "Complete your Ubuntu Tech Africa graduate and postgraduate programme application.",
+    description: "Complete your Ubuntu Tech Afrika graduate and postgraduate programme application.",
     alternates: { canonical: siteUrl("/apply/form") },
     robots: { index: false, follow: false },
   };

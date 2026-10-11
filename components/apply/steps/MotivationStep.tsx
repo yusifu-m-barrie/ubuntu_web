@@ -49,7 +49,7 @@ export function MotivationStep({ value, onChange, onNext, onBack }: Props) {
         <legend className="sr-only">Application questions</legend>
         <Field
           id="motivation"
-          label="Why do you want to join Ubuntu Tech Africa?"
+          label="Why do you want to join Ubuntu Tech Afrika?"
           required
           hint={countHint(value.motivation)}
           error={errors.motivation}

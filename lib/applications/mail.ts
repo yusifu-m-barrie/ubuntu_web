@@ -14,7 +14,7 @@ export function mailConfigured() {
 }
 
 export function mailFromAddress() {
-  return process.env.EMAIL_FROM || "Ubuntu Tech Africa <noreply@ubuntuafrika-sl.com>";
+  return process.env.EMAIL_FROM || "Ubuntu Tech Afrika <noreply@ubuntuafrika-sl.com>";
 }
 
 export function adminNotifyAddresses() {

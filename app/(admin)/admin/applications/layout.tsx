@@ -8,7 +8,7 @@ export default async function ApplicationsAdminLayout({ children }: { children: 
       <header className="border-b border-navy/10 bg-navy text-cream">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 lg:px-6">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange">Ubuntu Tech Africa</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange">Ubuntu Tech Afrika</p>
             <p className="font-serif text-lg">Graduate application review</p>
           </div>
           <nav className="flex items-center gap-4 text-sm">

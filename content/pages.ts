@@ -13,7 +13,7 @@ import type {
 
 export const siteSettings: SiteSettings = {
   companyName: "Ubuntu Afrika",
-  shortName: "Ubuntu Africa",
+  shortName: "Ubuntu Afrika",
   tagline: "I am Because We Are",
   logo: "/images/nuevo-logo-ubuntu-2-3_enano.jpg",
   favicon: "/images/nuevo-logo-ubuntu-2-3_enano.jpg",
@@ -86,7 +86,7 @@ export const homePage: HomePage = {
     description:
       "Ubuntu means to be able to understand that what is beneficial for the whole society makes us better as human beings.",
   },
-  heroTitle: "Ubuntu Africa",
+  heroTitle: "Ubuntu Afrika",
   heroLine1:
     "Ubuntu means to be able to understand that what is beneficial for the whole society makes us better as human beings.",
   heroLine2:
@@ -166,7 +166,7 @@ export const aboutPage: AboutPage = {
   seo: {
     title: "About Us – Ubuntu Afrika",
     description:
-      "Ubuntu Africa is a platform in which investors sharing a common thought about how to run businesses get together to invest and manage projects in Africa developing countries.",
+      "Ubuntu Afrika is a platform in which investors sharing a common thought about how to run businesses get together to invest and manage projects in Africa developing countries.",
   },
   heroTitle: "We build modern web applications",
   heroSubtitle: "Creative user interface design from a world-class team",
@@ -189,7 +189,7 @@ export const aboutPage: AboutPage = {
     },
   ],
   intro: [
-    "Ubuntu Africa is a platform in which investors sharing a common thought about how to run businesses get together to invest and mange projects in Africa developing countries.",
+    "Ubuntu Afrika is a platform in which investors sharing a common thought about how to run businesses get together to invest and mange projects in Africa developing countries.",
     "We are interested in bosting the business sector and forming new competitive companies, as a way to help developing countries to reach better economic, social and health standards.",
     "After paying our shareholders, the extra cash from the projects will be invested in new companies in the country. Thus a masterful circle is created by which the larger the profitability, the greater the number of projects to be finance",
   ],
@@ -266,7 +266,7 @@ export const careersPage: CareersPage = {
   seo: {
     title: "Careers – Ubuntu Afrika",
     description:
-      "Join Ubuntu Africa Foundation. Postgraduate training on software engineering and web applications development.",
+      "Join Ubuntu Afrika Foundation. Postgraduate training on software engineering and web applications development.",
   },
   heroTitle: "We build amazing products",
   heroSubtitle:
@@ -276,7 +276,7 @@ export const careersPage: CareersPage = {
   heroVideoId: "7b07tvwC1uQ",
   heroPoster: "/images/MG_2334.jpg",
   intro: [
-    "The Ubuntu Africa Foundation is a non-profit organization that has a long-lasting impact on its heritage in the pursuit of the general interest goals that are now detailed, mainly developing its activities in Africa.",
+    "The Ubuntu Afrika Foundation is a non-profit organization that has a long-lasting impact on its heritage in the pursuit of the general interest goals that are now detailed, mainly developing its activities in Africa.",
     "Among its aims are the promotion of research in the field of innovation and technology and its transfer to the productive fabric. The promotion of social and economic development of African countries and others in the process of development is through the postgraduate training on software engineering and web applications development.",
     "To achieve its aims, it carries out, among other activities, in Africa, training programs, training and workshops, training professionals or future professionals seeking excellence or scholarship to students who need it for their full training.",
   ],
@@ -402,7 +402,7 @@ export const postgraduatePage: PostgraduatePage = {
     },
   ],
   intro: [
-    "The Ubuntu Africa Foundation, based in Spain and Sierra Leone, is a non-profit organization that promotes projects in Sierra Leone with the fundamental objective of contributing to the economic development of Sierra Leone and generating a social impact. One of the fundamental projects promoted is Ubuntu Postgraduate, for whose implementation needs the collaboration of a solid partner and University of Makeni (UniMak) was selected.",
+    "The Ubuntu Afrika Foundation, based in Spain and Sierra Leone, is a non-profit organization that promotes projects in Sierra Leone with the fundamental objective of contributing to the economic development of Sierra Leone and generating a social impact. One of the fundamental projects promoted is Ubuntu Postgraduate, for whose implementation needs the collaboration of a solid partner and University of Makeni (UniMak) was selected.",
     "The project aims to contribute through a Postgraduate training of UNIMAK students and other competent students from other universities & Colleges within Sierra Leone who have successfully completed their Undergraduate Training in IT specialty. On the other hand, the Project will pursue the creation of a computer consulting services, under the Ubuntu Tech Project based in Sierra Leone, but with the possibility of offering its services both locally and to other countries, mainly Spain.",
     "The Ubuntu philosophy is applied to both the Ubuntu Postgraduate and Ubuntu Tech Project which seeks to optimize costs, because 100% sustainability is generated in cash flows towards social projects.",
     "To achieve its aims, it carries out, fully sponsored scholarship based training programs for professionals or future professionals.",

@@ -145,7 +145,7 @@ export const testimonials: Testimonial[] = [
   },
   {
     quote:
-      "Ubuntu Africa has been instrumental in my journey as a software engineer. It gave me the tools, the platform, and the community to learn, collaborate, and grow while confidently sharing my ideas with others.",
+      "Ubuntu Afrika has been instrumental in my journey as a software engineer. It gave me the tools, the platform, and the community to learn, collaborate, and grow while confidently sharing my ideas with others.",
     name: "Sullaiman Kamanda",
     cohort: "Cohort 4: 2023-2024",
     image: "/images/WhatsApp-Image-2026-02-11-at-15.13.45-1.jpeg",

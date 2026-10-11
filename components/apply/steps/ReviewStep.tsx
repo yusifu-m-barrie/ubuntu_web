@@ -107,7 +107,7 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
             </button>
           </header>
           <div className="grid min-w-0 gap-3">
-            <Answer label="Why Ubuntu Tech Africa" value={draft.questions.motivation} />
+            <Answer label="Why Ubuntu Tech Afrika" value={draft.questions.motivation} />
             <Answer label="Career goals" value={draft.questions.careerGoals} />
             <Answer label="Projects / experience" value={draft.questions.relevantExperience} />
             <Answer label="Additional" value={draft.questions.additionalInformation} />

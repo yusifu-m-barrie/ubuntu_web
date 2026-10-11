@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: {
     default: "Application review",
-    template: "%s | Ubuntu Tech Africa Admin",
+    template: "%s | Ubuntu Tech Afrika Admin",
   },
   robots: { index: false, follow: false },
 };

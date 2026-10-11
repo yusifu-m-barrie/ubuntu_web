@@ -43,7 +43,7 @@ export default async function ApplicationDetail({ params }: { params: Promise<{ 
   }
 
   const name = fullName(application.firstName, application.lastName, application.middleName);
-  const address = [application.address, application.city, application.country].filter(Boolean).join(", ");
+  const address = [application.address, application.city, application.district].filter(Boolean).join(", ");
 
   return (
     <article>
@@ -92,12 +92,14 @@ export default async function ApplicationDetail({ params }: { params: Promise<{ 
           />
           <Row label="Date of birth" value={formatAdminDay(application.dateOfBirth)} />
           <Row label="Gender" value={application.gender} />
+          <Row label="District" value={application.district} />
+          <Row label="City" value={application.city} />
           <Row label="Address" value={address} />
         </dl>
       </section>
 
       <section className="mt-4 rounded-2xl bg-white p-6 ring-1 ring-navy/10">
-        <h2 className="font-serif text-xl text-navy">Academic information</h2>
+        <h2 className="font-serif text-xl text-navy">Qualification</h2>
         <dl className="mt-4">
           <Row label="Institution" value={application.institution} />
           <Row label="Degree" value={application.degree} />
@@ -107,33 +109,24 @@ export default async function ApplicationDetail({ params }: { params: Promise<{ 
         </dl>
       </section>
 
-      <section className="mt-4 rounded-2xl bg-white p-6 ring-1 ring-navy/10">
-        <h2 className="font-serif text-xl text-navy">Programme</h2>
-        <dl className="mt-4">
-          <Row label="Programme" value={application.programme} />
-          <Row label="Areas of interest" value={application.areasOfInterest.join(", ") || "—"} />
-        </dl>
-      </section>
-
-      <section className="mt-4 rounded-2xl bg-white p-6 ring-1 ring-navy/10">
+      <section className="mt-4 overflow-hidden rounded-2xl bg-white p-6 ring-1 ring-navy/10">
         <h2 className="font-serif text-xl text-navy">Motivation</h2>
-        <div className="mt-4 space-y-4 text-sm leading-relaxed text-navy">
-          <div>
-            <h3 className="font-medium text-muted">Motivation</h3>
-            <p className="mt-1 whitespace-pre-line">{application.motivation}</p>
-          </div>
-          <div>
-            <h3 className="font-medium text-muted">Career goals</h3>
-            <p className="mt-1 whitespace-pre-line">{application.careerGoals}</p>
-          </div>
-          <div>
-            <h3 className="font-medium text-muted">Relevant experience</h3>
-            <p className="mt-1 whitespace-pre-line">{application.relevantExperience || "—"}</p>
-          </div>
-          <div>
-            <h3 className="font-medium text-muted">Additional information</h3>
-            <p className="mt-1 whitespace-pre-line">{application.additionalInformation || "—"}</p>
-          </div>
+        <div className="mt-4 grid min-w-0 gap-3 text-sm leading-relaxed text-navy">
+          {[
+            ["Motivation", application.motivation],
+            ["Career goals", application.careerGoals],
+            ["Relevant experience", application.relevantExperience],
+            ["Additional information", application.additionalInformation],
+          ].map(([label, value]) => (
+            <div key={label} className="min-w-0 overflow-hidden rounded-xl border border-navy/10 bg-cream">
+              <h3 className="border-b border-navy/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-orange">
+                {label}
+              </h3>
+              <p className="max-w-full overflow-hidden px-4 py-3 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                {value.trim() || "—"}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 

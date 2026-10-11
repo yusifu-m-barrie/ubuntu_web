@@ -9,7 +9,7 @@ export const APPLICATION_STATUSES = [
 
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
-export const DOCUMENT_KINDS = ["cv", "certificate", "transcript", "otherDocument"] as const;
+export const DOCUMENT_KINDS = ["certificate", "transcript", "cv", "otherDocument"] as const;
 export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 
 export const REQUIRED_DOCUMENT_KINDS = ["cv", "certificate", "transcript"] as const;
@@ -35,7 +35,7 @@ export type PersonalInformation = {
   phone: string;
   dateOfBirth: string;
   gender: string;
-  country: string;
+  district: string;
   city: string;
   address: string;
 };
@@ -106,6 +106,7 @@ export type ApplicationRecord = {
   phone: string;
   dateOfBirth: string;
   gender: string;
+  district: string;
   country: string;
   city: string;
   address: string;
@@ -153,6 +154,8 @@ export type ApplicationSummary = {
   email: string;
   fullName: string;
   programme: string;
+  district: string;
+  city: string;
   degree: string;
   fieldOfStudy: string;
   status: ApplicationStatus;

@@ -18,9 +18,22 @@ type Props = {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid gap-1 py-2 sm:grid-cols-[10rem_1fr] sm:gap-4">
+    <div className="grid min-w-0 gap-1 py-2 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-4">
       <dt className="text-sm font-medium text-muted">{label}</dt>
-      <dd className="text-sm text-navy">{value || "—"}</dd>
+      <dd className="min-w-0 overflow-hidden break-words text-sm text-navy [overflow-wrap:anywhere]">{value || "—"}</dd>
+    </div>
+  );
+}
+
+function Answer({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0 overflow-hidden rounded-xl border border-navy/10 bg-white/80">
+      <p className="border-b border-navy/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-orange">
+        {label}
+      </p>
+      <p className="max-w-full overflow-hidden px-4 py-3 text-sm leading-relaxed text-navy [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
+        {value.trim() || "—"}
+      </p>
     </div>
   );
 }
@@ -50,7 +63,7 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <section className="rounded-2xl bg-cream p-5 ring-1 ring-navy/10 sm:p-6">
+        <section className="overflow-hidden rounded-2xl bg-cream p-5 ring-1 ring-navy/10 sm:p-6">
           <header className="mb-3 flex items-center justify-between gap-3">
             <h2 className="font-serif text-xl text-navy">Personal information</h2>
             <button type="button" className="text-sm font-semibold text-orange hover:underline" onClick={() => onEdit(1)} aria-label="Edit personal information">
@@ -63,16 +76,16 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
             <Row label="Phone number" value={draft.personal.phone} />
             <Row label="Date of birth" value={draft.personal.dateOfBirth} />
             <Row label="Gender" value={draft.personal.gender} />
-            <Row label="Country" value={draft.personal.country} />
+            <Row label="District" value={draft.personal.district} />
             <Row label="City" value={draft.personal.city} />
             <Row label="Address" value={draft.personal.address} />
           </dl>
         </section>
 
-        <section className="mt-4 rounded-2xl bg-cream p-5 ring-1 ring-navy/10 sm:p-6">
+        <section className="mt-4 overflow-hidden rounded-2xl bg-cream p-5 ring-1 ring-navy/10 sm:p-6">
           <header className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="font-serif text-xl text-navy">Academic information</h2>
-            <button type="button" className="text-sm font-semibold text-orange hover:underline" onClick={() => onEdit(2)} aria-label="Edit academic information">
+            <h2 className="font-serif text-xl text-navy">Qualification</h2>
+            <button type="button" className="text-sm font-semibold text-orange hover:underline" onClick={() => onEdit(2)} aria-label="Edit qualification">
               Edit
             </button>
           </header>
@@ -86,46 +99,33 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
           </dl>
         </section>
 
-        <section className="mt-4 rounded-2xl bg-cream p-5 ring-1 ring-navy/10 sm:p-6">
-          <header className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="font-serif text-xl text-navy">Programme</h2>
-            <button type="button" className="text-sm font-semibold text-orange hover:underline" onClick={() => onEdit(3)} aria-label="Edit programme">
-              Edit
-            </button>
-          </header>
-          <dl>
-            <Row label="Programme" value={draft.programme.programme} />
-            <Row label="Interests" value={draft.programme.areasOfInterest.join(", ")} />
-          </dl>
-        </section>
-
-        <section className="mt-4 rounded-2xl bg-cream p-5 ring-1 ring-navy/10 sm:p-6">
-          <header className="mb-3 flex items-center justify-between gap-3">
+        <section className="mt-4 overflow-hidden rounded-2xl bg-cream p-5 ring-1 ring-navy/10 sm:p-6">
+          <header className="mb-4 flex items-center justify-between gap-3">
             <h2 className="font-serif text-xl text-navy">Motivation</h2>
-            <button type="button" className="text-sm font-semibold text-orange hover:underline" onClick={() => onEdit(4)} aria-label="Edit motivation">
+            <button type="button" className="text-sm font-semibold text-orange hover:underline" onClick={() => onEdit(3)} aria-label="Edit motivation">
               Edit
             </button>
           </header>
-          <dl>
-            <Row label="Why Ubuntu Tech Africa" value={draft.questions.motivation} />
-            <Row label="Career goals" value={draft.questions.careerGoals} />
-            <Row label="Projects / experience" value={draft.questions.relevantExperience} />
-            <Row label="Additional" value={draft.questions.additionalInformation} />
-          </dl>
+          <div className="grid min-w-0 gap-3">
+            <Answer label="Why Ubuntu Tech Africa" value={draft.questions.motivation} />
+            <Answer label="Career goals" value={draft.questions.careerGoals} />
+            <Answer label="Projects / experience" value={draft.questions.relevantExperience} />
+            <Answer label="Additional" value={draft.questions.additionalInformation} />
+          </div>
         </section>
 
-        <section className="mt-4 rounded-2xl bg-cream p-5 ring-1 ring-navy/10 sm:p-6">
+        <section className="mt-4 overflow-hidden rounded-2xl bg-cream p-5 ring-1 ring-navy/10 sm:p-6">
           <header className="mb-3 flex items-center justify-between gap-3">
             <h2 className="font-serif text-xl text-navy">Documents</h2>
-            <button type="button" className="text-sm font-semibold text-orange hover:underline" onClick={() => onEdit(5)} aria-label="Edit documents">
+            <button type="button" className="text-sm font-semibold text-orange hover:underline" onClick={() => onEdit(4)} aria-label="Edit documents">
               Edit
             </button>
           </header>
           <ul className="space-y-2 text-sm">
             {DOCUMENT_KINDS.map((kind) => (
-              <li key={kind} className="flex justify-between gap-3">
-                <span className="text-muted">{DOCUMENT_LABELS[kind]}</span>
-                <span className="text-right font-medium text-navy">
+              <li key={kind} className="flex min-w-0 justify-between gap-3">
+                <span className="min-w-0 shrink-0 text-muted">{DOCUMENT_LABELS[kind]}</span>
+                <span className="min-w-0 overflow-hidden break-words text-right font-medium text-navy [overflow-wrap:anywhere]">
                   {draft.documents[kind]?.filename || (kind === "otherDocument" ? "Not provided" : "Missing")}
                 </span>
               </li>

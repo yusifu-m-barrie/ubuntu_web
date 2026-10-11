@@ -2,6 +2,7 @@
 
 import { describedBy, Field, focusFirstError, inputClass, StepActions } from "@/components/apply/Fields";
 import { GENDERS } from "@/lib/applications/constants";
+import { DISTRICTS, citiesForDistrict } from "@/lib/applications/locations";
 import { personalSchema } from "@/lib/applications/schema";
 import type { PersonalInformation } from "@/types/application";
 import { useState } from "react";
@@ -135,27 +136,48 @@ export function PersonalStep({ value, onChange, onNext }: Props) {
             ))}
           </select>
         </Field>
-        <Field id="country" label="Country" required error={errors.country}>
-          <input
-            id="country"
-            autoComplete="country-name"
-            value={value.country}
-            onChange={(event) => update("country", event.target.value)}
+        <Field id="district" label="District" required error={errors.district}>
+          <select
+            id="district"
+            value={value.district}
+            onChange={(event) => {
+              const district = event.target.value;
+              const cities = citiesForDistrict(district);
+              onChange({
+                ...value,
+                district,
+                city: cities.includes(value.city) ? value.city : "",
+              });
+            }}
             className={inputClass}
-            aria-invalid={Boolean(errors.country)}
-            aria-describedby={describedBy("country", undefined, errors.country)}
-          />
+            aria-invalid={Boolean(errors.district)}
+            aria-describedby={describedBy("district", undefined, errors.district)}
+          >
+            <option value="">Select district</option>
+            {DISTRICTS.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
         </Field>
         <Field id="city" label="City" required error={errors.city}>
-          <input
+          <select
             id="city"
-            autoComplete="address-level2"
             value={value.city}
             onChange={(event) => update("city", event.target.value)}
             className={inputClass}
+            disabled={!value.district}
             aria-invalid={Boolean(errors.city)}
             aria-describedby={describedBy("city", undefined, errors.city)}
-          />
+          >
+            <option value="">{value.district ? "Select city" : "Select a district first"}</option>
+            {citiesForDistrict(value.district).map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
         </Field>
         <div className="sm:col-span-2">
           <Field id="address" label="Address" required error={errors.address}>

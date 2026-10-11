@@ -1,3 +1,4 @@
+import { DEFAULT_PROGRAMME } from "@/lib/applications/constants";
 import type { ApplicationDraft } from "@/types/application";
 
 export function emptyDraft(): ApplicationDraft {
@@ -12,7 +13,7 @@ export function emptyDraft(): ApplicationDraft {
       phone: "",
       dateOfBirth: "",
       gender: "",
-      country: "",
+      district: "",
       city: "",
       address: "",
     },
@@ -25,7 +26,7 @@ export function emptyDraft(): ApplicationDraft {
       additionalQualifications: "",
     },
     programme: {
-      programme: "",
+      programme: DEFAULT_PROGRAMME,
       areasOfInterest: [],
     },
     questions: {

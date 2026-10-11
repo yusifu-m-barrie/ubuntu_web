@@ -1,3 +1,5 @@
+import { DUPLICATE_APPLICATION_MESSAGE } from "@/lib/applications/identity";
+
 export class ApplicationError extends Error {
   constructor(
     message: string,
@@ -10,7 +12,7 @@ export class ApplicationError extends Error {
 }
 
 export class DuplicateApplicationError extends ApplicationError {
-  constructor(message = "An open application with this email already exists for this intake.") {
+  constructor(message = DUPLICATE_APPLICATION_MESSAGE) {
     super(message, 409, "DUPLICATE_APPLICATION");
     this.name = "DuplicateApplicationError";
   }

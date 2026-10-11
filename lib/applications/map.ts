@@ -1,3 +1,4 @@
+import { DEFAULT_COUNTRY, DEFAULT_PROGRAMME } from "@/lib/applications/constants";
 import type { ApplicationPayload, ApplicationRecord, DocumentKind, FileReference } from "@/types/application";
 import { DOCUMENT_KINDS } from "@/types/application";
 
@@ -20,7 +21,8 @@ export function payloadToRecord(
     phone: payload.personal.phone,
     dateOfBirth: payload.personal.dateOfBirth,
     gender: payload.personal.gender,
-    country: payload.personal.country,
+    district: payload.personal.district,
+    country: DEFAULT_COUNTRY,
     city: payload.personal.city,
     address: payload.personal.address,
     institution: payload.academic.institution,
@@ -29,7 +31,7 @@ export function payloadToRecord(
     graduationYear: payload.academic.graduationYear,
     gradeOrGPA: payload.academic.gradeOrGPA,
     additionalQualifications: payload.academic.additionalQualifications,
-    programme: payload.programme.programme,
+    programme: payload.programme.programme || DEFAULT_PROGRAMME,
     areasOfInterest: payload.programme.areasOfInterest,
     motivation: payload.questions.motivation,
     careerGoals: payload.questions.careerGoals,

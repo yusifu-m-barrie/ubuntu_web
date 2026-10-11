@@ -22,7 +22,7 @@ export function ProgressSteps({ current }: { current: number }) {
       >
         <div className="h-full rounded-full bg-orange transition-all duration-300" style={{ width: `${percent}%` }} />
       </div>
-      <ol className="mt-4 hidden gap-2 sm:grid sm:grid-cols-3 lg:grid-cols-6">
+      <ol className="mt-4 hidden gap-2 sm:grid sm:grid-cols-3 lg:grid-cols-5">
         {APPLICATION_STEPS.map((step) => {
           const done = step.id < current;
           const active = step.id === current;

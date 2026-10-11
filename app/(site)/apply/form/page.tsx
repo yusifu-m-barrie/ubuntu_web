@@ -27,7 +27,7 @@ export default function ApplyFormPage() {
         </p>
         <p className="mt-4 text-sm text-muted">
           Your answers are saved as you move between steps. Documents may be PDF, Word, JPEG, or PNG files of 10 MB or
-          less.
+          less. Each person may submit only one application for this intake.
         </p>
         <div className="mt-8 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-navy/10 sm:p-8">
           <ApplyWizard />

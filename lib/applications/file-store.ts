@@ -4,6 +4,7 @@ import path from "node:path";
 import { ADMIN_PAGE_SIZE, OPEN_APPLICATION_STATUSES } from "@/lib/applications/constants";
 import { tallyCounts } from "@/lib/applications/counts";
 import { DuplicateApplicationError } from "@/lib/applications/errors";
+import { DUPLICATE_APPLICATION_MESSAGE, identityFromPayload, isSameApplicant } from "@/lib/applications/identity";
 import {
   appendHistory,
   noteHistoryEvent,
@@ -69,17 +70,11 @@ export const fileStore: ApplicationStore = {
     }
 
     const year = cohortYear();
-    const email = payload.personal.email.trim().toLowerCase();
-    const open = db.applications.find(
-      (item) =>
-        item.email.toLowerCase() === email &&
-        item.cohortYear === year &&
-        OPEN_APPLICATION_STATUSES.includes(item.status),
+    const duplicate = db.applications.find(
+      (item) => item.cohortYear === year && isSameApplicant(item, identityFromPayload(payload)),
     );
-    if (open) {
-      throw new DuplicateApplicationError(
-        `An application (${open.applicationReference}) with this email is already in progress.`,
-      );
+    if (duplicate) {
+      throw new DuplicateApplicationError(DUPLICATE_APPLICATION_MESSAGE);
     }
 
     const next = (db.lastNumbers[String(year)] || 0) + 1;
@@ -146,6 +141,14 @@ export const fileStore: ApplicationStore = {
           item.cohortYear === year &&
           OPEN_APPLICATION_STATUSES.includes(item.status),
       ) || null
+    );
+  },
+
+  async findDuplicateForPerson(payload, year) {
+    const db = await readDb();
+    return (
+      db.applications.find((item) => item.cohortYear === year && isSameApplicant(item, identityFromPayload(payload))) ||
+      null
     );
   },
 

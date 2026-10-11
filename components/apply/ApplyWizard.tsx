@@ -5,10 +5,9 @@ import { AcademicStep } from "@/components/apply/steps/AcademicStep";
 import { DocumentsStep } from "@/components/apply/steps/DocumentsStep";
 import { MotivationStep } from "@/components/apply/steps/MotivationStep";
 import { PersonalStep } from "@/components/apply/steps/PersonalStep";
-import { ProgrammeStep } from "@/components/apply/steps/ProgrammeStep";
 import { ReviewStep } from "@/components/apply/steps/ReviewStep";
 import { SuccessPanel } from "@/components/apply/SuccessPanel";
-import { DRAFT_STORAGE_KEY } from "@/lib/applications/constants";
+import { DEFAULT_PROGRAMME, DRAFT_STORAGE_KEY } from "@/lib/applications/constants";
 import { emptyDraft } from "@/lib/applications/draft";
 import { applicationPayloadSchema } from "@/lib/applications/schema";
 import type { ApplicationDraft } from "@/types/application";
@@ -25,9 +24,10 @@ function readDraft(): ApplicationDraft {
     return {
       ...base,
       ...parsed,
+      step: Math.min(Math.max(parsed.step || 1, 1), 5),
       personal: { ...base.personal, ...parsed.personal },
       academic: { ...base.academic, ...parsed.academic },
-      programme: { ...base.programme, ...parsed.programme, areasOfInterest: parsed.programme?.areasOfInterest || [] },
+      programme: { programme: DEFAULT_PROGRAMME, areasOfInterest: [] },
       questions: { ...base.questions, ...parsed.questions },
       documents: parsed.documents || {},
     };
@@ -88,7 +88,7 @@ export function ApplyWizard() {
     const parsed = applicationPayloadSchema.safeParse({
       personal: draft.personal,
       academic: draft.academic,
-      programme: draft.programme,
+      programme: { programme: DEFAULT_PROGRAMME, areasOfInterest: [] },
       questions: draft.questions,
       documents: draft.documents,
       declaration: draft.declaration,
@@ -154,35 +154,27 @@ export function ApplyWizard() {
         />
       ) : null}
       {draft.step === 3 ? (
-        <ProgrammeStep
-          value={draft.programme}
-          onChange={(programme) => patchDraft({ programme })}
+        <MotivationStep
+          value={draft.questions}
+          onChange={(questions) => patchDraft({ questions })}
           onNext={() => goTo(4)}
           onBack={() => goTo(2)}
         />
       ) : null}
       {draft.step === 4 ? (
-        <MotivationStep
-          value={draft.questions}
-          onChange={(questions) => patchDraft({ questions })}
+        <DocumentsStep
+          value={draft.documents}
+          onChange={(documents) => patchDraft({ documents })}
           onNext={() => goTo(5)}
           onBack={() => goTo(3)}
         />
       ) : null}
       {draft.step === 5 ? (
-        <DocumentsStep
-          value={draft.documents}
-          onChange={(documents) => patchDraft({ documents })}
-          onNext={() => goTo(6)}
-          onBack={() => goTo(4)}
-        />
-      ) : null}
-      {draft.step === 6 ? (
         <ReviewStep
           draft={draft}
           error={submitError}
           submitting={submitting}
-          onBack={() => goTo(5)}
+          onBack={() => goTo(4)}
           onEdit={goTo}
           onDeclaration={(declaration) => patchDraft({ declaration })}
           onSubmit={onSubmit}

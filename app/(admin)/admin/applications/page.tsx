@@ -1,7 +1,7 @@
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { requireAdminPage } from "@/lib/applications/admin-guard";
 import { formatAdminDate } from "@/lib/applications/admin-format";
-import { APPLICATION_STATUSES, PROGRAMMES, STATUS_LABELS } from "@/lib/applications/constants";
+import { APPLICATION_STATUSES, STATUS_LABELS } from "@/lib/applications/constants";
 import { listApplications } from "@/lib/applications/service";
 import type { ApplicationCounts, ApplicationStatus } from "@/types/application";
 import Link from "next/link";
@@ -96,7 +96,7 @@ export default async function ApplicationsIndex({
         </section>
       ) : null}
 
-      <form className="mt-8 grid gap-3 rounded-2xl bg-white p-4 ring-1 ring-navy/10 lg:grid-cols-[1.4fr_11rem_14rem_10rem_auto]" method="get" aria-label="Filter applications">
+      <form className="mt-8 grid gap-3 rounded-2xl bg-white p-4 ring-1 ring-navy/10 lg:grid-cols-[1.4fr_11rem_10rem_auto]" method="get" aria-label="Filter applications">
         <label className="text-sm text-navy">
           Search
           <input
@@ -114,21 +114,6 @@ export default async function ApplicationsIndex({
             {APPLICATION_STATUSES.map((status) => (
               <option key={status} value={status}>
                 {STATUS_LABELS[status]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="text-sm text-navy">
-          Programme
-          <select
-            name="programme"
-            defaultValue={params.programme || ""}
-            className="mt-1 w-full rounded-lg border border-navy/15 bg-cream px-3 py-2"
-          >
-            <option value="">All</option>
-            {PROGRAMMES.map((item) => (
-              <option key={item} value={item}>
-                {item}
               </option>
             ))}
           </select>
@@ -176,7 +161,7 @@ export default async function ApplicationsIndex({
                 </div>
                 <p className="mt-2 text-sm">{item.email}</p>
                 <p className="text-sm text-muted">
-                  {item.programme} · {item.degree || "—"}
+                  {[item.district, item.city].filter(Boolean).join(", ") || "—"} · {item.degree || "—"}
                 </p>
                 <div className="mt-3 flex items-center justify-between gap-3">
                   <span className="text-xs text-muted">{formatAdminDate(item.submittedAt)}</span>
@@ -193,7 +178,7 @@ export default async function ApplicationsIndex({
                 <tr>
                   <th className="px-4 py-3 font-semibold">Applicant name</th>
                   <th className="px-4 py-3 font-semibold">Email</th>
-                  <th className="px-4 py-3 font-semibold">Programme</th>
+                  <th className="px-4 py-3 font-semibold">District</th>
                   <th className="px-4 py-3 font-semibold">Degree</th>
                   <th className="px-4 py-3 font-semibold">Application reference</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
@@ -206,7 +191,7 @@ export default async function ApplicationsIndex({
                   <tr key={item.id} className="border-t border-navy/10">
                     <td className="px-4 py-3 font-medium text-navy">{item.fullName}</td>
                     <td className="px-4 py-3">{item.email}</td>
-                    <td className="px-4 py-3">{item.programme}</td>
+                    <td className="px-4 py-3">{item.district || "—"}</td>
                     <td className="px-4 py-3">{item.degree || "—"}</td>
                     <td className="px-4 py-3 font-medium">{item.applicationReference}</td>
                     <td className="px-4 py-3">

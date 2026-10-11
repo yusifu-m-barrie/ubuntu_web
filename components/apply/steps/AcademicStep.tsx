@@ -42,7 +42,7 @@ export function AcademicStep({ value, onChange, onNext, onBack }: Props) {
   return (
     <form onSubmit={onSubmit} noValidate>
       <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="sr-only">Academic information</legend>
+        <legend className="sr-only">Qualification</legend>
         <div className="sm:col-span-2">
           <Field id="institution" label="Institution" required error={errors.institution}>
             <input

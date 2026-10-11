@@ -1,10 +1,11 @@
 import {
-  AREAS_OF_INTEREST,
+  DEFAULT_PROGRAMME,
   DEGREES,
   FIELDS_OF_STUDY,
   GENDERS,
-  PROGRAMMES,
+  MOTIVATION_MAX_CHARS,
 } from "@/lib/applications/constants";
+import { DISTRICTS, isCityInDistrict } from "@/lib/applications/locations";
 import { ALLOWED_CONTENT_TYPES, MAX_FILE_BYTES, isSafeStorageKey } from "@/lib/applications/file-types";
 import { APPLICATION_STATUSES, DOCUMENT_KINDS } from "@/types/application";
 import { z } from "zod";
@@ -47,9 +48,12 @@ export const personalSchema = z.object({
       return date <= latest && date >= earliest;
     }, "Enter a valid date of birth."),
   gender: oneOf(GENDERS, "Select a gender option."),
-  country: required("Country").max(80),
+  district: oneOf(DISTRICTS, "Select a district."),
   city: required("City").max(80),
   address: required("Address").max(240),
+}).refine((value) => isCityInDistrict(value.district, value.city), {
+  message: "Select a city in the chosen district.",
+  path: ["city"],
 });
 
 export const academicSchema = z.object({
@@ -69,21 +73,21 @@ export const academicSchema = z.object({
   additionalQualifications: z.string().trim().max(1000),
 });
 
-export const programmeSchema = z.object({
-  programme: oneOf(PROGRAMMES, "Select a programme."),
-  areasOfInterest: z
-    .array(z.string())
-    .min(1, "Select at least one area of interest.")
-    .refine((values) => values.every((value) => AREAS_OF_INTEREST.includes(value as (typeof AREAS_OF_INTEREST)[number])), {
-      message: "Choose a listed area of interest.",
-    }),
-});
+export const programmeSchema = z
+  .object({
+    programme: z.string().optional(),
+    areasOfInterest: z.array(z.string()).optional(),
+  })
+  .transform(() => ({
+    programme: DEFAULT_PROGRAMME,
+    areasOfInterest: [] as string[],
+  }));
 
 export const questionsSchema = z.object({
-  motivation: required("Motivation").min(40, "Please write at least 40 characters.").max(2000),
-  careerGoals: required("Career goals").min(40, "Please write at least 40 characters.").max(2000),
-  relevantExperience: z.string().trim().max(2000),
-  additionalInformation: z.string().trim().max(2000),
+  motivation: required("Motivation").max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
+  careerGoals: required("Career goals").max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
+  relevantExperience: z.string().trim().max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
+  additionalInformation: z.string().trim().max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
 });
 
 export const fileReferenceSchema = z.object({

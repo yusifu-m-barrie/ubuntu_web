@@ -10,14 +10,16 @@ export { APPLICATION_STATUSES, DOCUMENT_KINDS, REQUIRED_DOCUMENT_KINDS };
 
 export const APPLICATION_STEPS = [
   { id: 1, label: "Personal", title: "Personal information" },
-  { id: 2, label: "Academic", title: "Academic information" },
-  { id: 3, label: "Programme", title: "Programme" },
-  { id: 4, label: "Motivation", title: "Motivation" },
-  { id: 5, label: "Documents", title: "Documents" },
-  { id: 6, label: "Review", title: "Review & submit" },
+  { id: 2, label: "Qualification", title: "Qualification" },
+  { id: 3, label: "Motivation", title: "Motivation" },
+  { id: 4, label: "Documents", title: "Documents" },
+  { id: 5, label: "Review", title: "Review & submit" },
 ] as const;
 
-export const GENDERS = ["Woman", "Man", "Non-binary", "Prefer not to say"] as const;
+export const GENDERS = ["Male", "Female", "Prefer not to say"] as const;
+export const MOTIVATION_MAX_CHARS = 250;
+export const DEFAULT_PROGRAMME = "Ubuntu Postgraduate";
+export const DEFAULT_COUNTRY = "Sierra Leone";
 
 export const DEGREES = [
   "Bachelor's degree",
@@ -35,7 +37,7 @@ export const FIELDS_OF_STUDY = [
   "Other related field",
 ] as const;
 
-export const PROGRAMMES = ["Ubuntu Postgraduate", "Ubuntu Tech / Graduate training"] as const;
+export const PROGRAMMES = [DEFAULT_PROGRAMME] as const;
 
 export const AREAS_OF_INTEREST = [
   "Software Development",
@@ -67,21 +69,21 @@ export const OPEN_APPLICATION_STATUSES: ApplicationStatus[] = [
 ];
 
 export const DOCUMENT_LABELS: Record<DocumentKind, string> = {
-  cv: "CV",
-  certificate: "Degree certificate",
-  transcript: "Academic transcript",
+  certificate: "Degree / Certificate / Official Attestation",
+  transcript: "Academic Transcript / Statement of Result",
+  cv: "CV / Resume",
   otherDocument: "Other supporting document",
 };
 
 export const DOCUMENT_HINTS: Record<DocumentKind, string> = {
-  cv: "Up-to-date curriculum vitae. PDF, Word, JPEG, or PNG. 10 MB maximum.",
-  certificate: "Degree or equivalent certificate. PDF, Word, JPEG, or PNG. 10 MB maximum.",
-  transcript: "Official or student copy of your transcript. PDF, Word, JPEG, or PNG. 10 MB maximum.",
-  otherDocument: "Optional cover letter or supporting file. PDF, Word, JPEG, or PNG. 10 MB maximum.",
+  certificate: "Required. PDF, Word, JPEG, or PNG. 10 MB maximum.",
+  transcript: "Required. PDF, Word, JPEG, or PNG. 10 MB maximum.",
+  cv: "Required. PDF, Word, JPEG, or PNG. 10 MB maximum.",
+  otherDocument: "Optional supporting file. PDF, Word, JPEG, or PNG. 10 MB maximum.",
 };
 
 export { MAX_FILE_BYTES, MAX_FILE_LABEL, ACCEPTED_UPLOAD_ATTR } from "@/lib/applications/file-types";
-export const DRAFT_STORAGE_KEY = "uta-application-draft-v3";
+export const DRAFT_STORAGE_KEY = "uta-application-draft-v4";
 export const ADMIN_COOKIE = "uta_admin";
 export const REFERENCE_PREFIX = "UTA";
 export const ADMIN_PAGE_SIZE = 20;

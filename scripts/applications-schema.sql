@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS applications (
   phone TEXT NOT NULL,
   date_of_birth DATE NOT NULL,
   gender TEXT NOT NULL,
-  country TEXT NOT NULL,
+  country TEXT NOT NULL DEFAULT 'Sierra Leone',
+  district TEXT NOT NULL,
   city TEXT NOT NULL,
   address TEXT NOT NULL,
   institution TEXT NOT NULL,
@@ -49,6 +50,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS applications_reference_idx
 
 CREATE INDEX IF NOT EXISTS applications_email_idx
   ON applications (LOWER(email));
+
+CREATE UNIQUE INDEX IF NOT EXISTS applications_email_cohort_unique_idx
+  ON applications (LOWER(email), cohort_year);
 
 CREATE INDEX IF NOT EXISTS applications_status_idx
   ON applications (status);

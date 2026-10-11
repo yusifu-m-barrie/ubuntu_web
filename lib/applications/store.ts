@@ -14,6 +14,7 @@ export type ApplicationStore = {
   getByReference: (reference: string) => Promise<ApplicationRecord | null>;
   list: (query?: ApplicationListQuery) => Promise<ApplicationListResult>;
   findOpenByEmail: (email: string, cohortYear: number) => Promise<ApplicationRecord | null>;
+  findDuplicateForPerson: (payload: ApplicationPayload, cohortYear: number) => Promise<ApplicationRecord | null>;
   updateStatus: (id: string, status: ApplicationStatus, reviewedBy?: string) => Promise<ApplicationRecord | null>;
   addNotes: (id: string, notes: string, reviewedBy?: string) => Promise<ApplicationRecord | null>;
   appendHistoryEvent: (id: string, event: ApplicationHistoryEvent) => Promise<ApplicationRecord | null>;

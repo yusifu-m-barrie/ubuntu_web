@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { ADMIN_PAGE_SIZE, OPEN_APPLICATION_STATUSES } from "@/lib/applications/constants";
 import { emptyCounts } from "@/lib/applications/counts";
 import { ApplicationStorageError, DuplicateApplicationError } from "@/lib/applications/errors";
+import { DUPLICATE_APPLICATION_MESSAGE, identityFromPayload, isSameApplicant } from "@/lib/applications/identity";
 import {
   appendHistory,
   noteHistoryEvent,
@@ -30,7 +31,7 @@ function sql() {
 
 const SELECT_COLUMNS = `
   id, draft_id, reference, first_name, middle_name, last_name, email, phone, date_of_birth, gender,
-  country, city, address, institution, degree, field_of_study, graduation_year, grade_or_gpa,
+  country, district, city, address, institution, degree, field_of_study, graduation_year, grade_or_gpa,
   additional_qualifications, programme, areas_of_interest, motivation, career_goals, relevant_experience,
   additional_information, cv, certificate, transcript, other_document, status, submitted_at, updated_at,
   reviewed_at, reviewed_by, admin_notes, cohort_year, history
@@ -60,6 +61,7 @@ async function ensureSchema() {
       date_of_birth DATE,
       gender TEXT NOT NULL DEFAULT '',
       country TEXT NOT NULL DEFAULT '',
+      district TEXT NOT NULL DEFAULT '',
       city TEXT NOT NULL DEFAULT '',
       address TEXT NOT NULL DEFAULT '',
       institution TEXT NOT NULL DEFAULT '',
@@ -97,6 +99,7 @@ async function ensureSchema() {
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS date_of_birth DATE",
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS gender TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS country TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE applications ADD COLUMN IF NOT EXISTS district TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS city TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS address TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS institution TEXT NOT NULL DEFAULT ''",
@@ -134,6 +137,13 @@ async function ensureSchema() {
   await runQuery("DROP INDEX IF EXISTS applications_email_year_idx");
   await runQuery("CREATE UNIQUE INDEX IF NOT EXISTS applications_reference_idx ON applications (reference)");
   await runQuery("CREATE INDEX IF NOT EXISTS applications_email_idx ON applications (LOWER(email))");
+  try {
+    await runQuery(
+      "CREATE UNIQUE INDEX IF NOT EXISTS applications_email_cohort_unique_idx ON applications (LOWER(email), cohort_year)",
+    );
+  } catch {
+    /* existing duplicate emails for a cohort must be resolved before this index can apply */
+  }
   await runQuery("CREATE INDEX IF NOT EXISTS applications_status_idx ON applications (status)");
   await runQuery("CREATE INDEX IF NOT EXISTS applications_programme_idx ON applications (programme)");
   await runQuery("CREATE INDEX IF NOT EXISTS applications_field_idx ON applications (field_of_study)");
@@ -192,6 +202,7 @@ function rowToRecord(row: ApplicationRow): ApplicationRecord {
     phone: String(row.phone || ""),
     dateOfBirth: row.date_of_birth ? String(row.date_of_birth).slice(0, 10) : "",
     gender: String(row.gender || ""),
+    district: String(row.district || ""),
     country: String(row.country || ""),
     city: String(row.city || ""),
     address: String(row.address || ""),
@@ -253,8 +264,6 @@ export const postgresStore: ApplicationStore = {
     await ensureSchema();
     const db = sql();
     const year = cohortYear();
-    const email = payload.personal.email.trim().toLowerCase();
-
     const existingDraft = (await db`
       SELECT id FROM applications WHERE draft_id = ${draftId} LIMIT 1
     `) as { id: string }[];
@@ -263,11 +272,9 @@ export const postgresStore: ApplicationStore = {
       if (current) return current;
     }
 
-    const open = await this.findOpenByEmail(email, year);
-    if (open) {
-      throw new DuplicateApplicationError(
-        `An application (${open.applicationReference}) with this email is already in progress.`,
-      );
+    const duplicate = await this.findDuplicateForPerson(payload, year);
+    if (duplicate) {
+      throw new DuplicateApplicationError(DUPLICATE_APPLICATION_MESSAGE);
     }
 
     const id = randomUUID();
@@ -288,14 +295,14 @@ export const postgresStore: ApplicationStore = {
       await db`
         INSERT INTO applications (
           id, draft_id, reference, first_name, middle_name, last_name, email, phone, date_of_birth, gender,
-          country, city, address, institution, degree, field_of_study, graduation_year, grade_or_gpa,
+          country, district, city, address, institution, degree, field_of_study, graduation_year, grade_or_gpa,
           additional_qualifications, programme, areas_of_interest, motivation, career_goals, relevant_experience,
           additional_information, cv, certificate, transcript, other_document, status, submitted_at, updated_at,
           admin_notes, cohort_year, history
         ) VALUES (
           ${record.id}, ${draftId}, ${record.applicationReference}, ${record.firstName}, ${record.middleName},
           ${record.lastName}, ${record.email}, ${record.phone}, ${record.dateOfBirth}, ${record.gender},
-          ${record.country}, ${record.city}, ${record.address}, ${record.institution}, ${record.degree},
+          ${record.country}, ${record.district}, ${record.city}, ${record.address}, ${record.institution}, ${record.degree},
           ${record.fieldOfStudy}, ${Number(record.graduationYear)}, ${record.gradeOrGPA},
           ${record.additionalQualifications}, ${record.programme}, ${record.areasOfInterest}, ${record.motivation},
           ${record.careerGoals}, ${record.relevantExperience}, ${record.additionalInformation},
@@ -397,6 +404,23 @@ export const postgresStore: ApplicationStore = {
       [email.toLowerCase(), year, OPEN_APPLICATION_STATUSES],
     );
     return rows[0] ? withHistory(rowToRecord(rows[0])) : null;
+  },
+
+  async findDuplicateForPerson(payload, year) {
+    await ensureSchema();
+    const identity = identityFromPayload(payload);
+    const clauses = ["LOWER(email) = $2"];
+    const params: unknown[] = [year, identity.email];
+    if (identity.phone) {
+      params.push(identity.phone);
+      clauses.push(`RIGHT(regexp_replace(COALESCE(phone, ''), '[^0-9]', '', 'g'), ${identity.phone.length}) = $${params.length}`);
+    }
+    const rows = await queryRows(
+      `SELECT ${SELECT_COLUMNS} FROM applications WHERE cohort_year = $1 AND (${clauses.join(" OR ")}) ORDER BY submitted_at DESC LIMIT 10`,
+      params,
+    );
+    const match = rows.map(rowToRecord).find((record) => isSameApplicant(record, identity));
+    return match ? withHistory(match) : null;
   },
 
   async updateStatus(id, status, reviewedBy = "Admin") {

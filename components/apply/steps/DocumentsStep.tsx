@@ -117,8 +117,9 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
       <fieldset className="space-y-4">
         <legend className="sr-only">Application documents</legend>
         <p className="text-sm text-muted">
-          PDF, Word (.doc, .docx), JPEG, or PNG files, up to {MAX_FILE_LABEL} each. CV, certificate, and transcript are
-          required.
+          PDF, Word (.doc, .docx), JPEG, or PNG files, up to {MAX_FILE_LABEL} each. Degree / Certificate / Official
+          Attestation, Academic Transcript / Statement of Result, and CV / Resume are required. Other supporting
+          document is optional.
         </p>
         {DOCUMENT_KINDS.map((kind) => {
           const uploaded = value[kind];

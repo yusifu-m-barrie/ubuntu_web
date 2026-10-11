@@ -75,9 +75,9 @@ export default async function ApplyLanding() {
             <FileText className="h-8 w-8 text-orange" aria-hidden />
             <h2 className="mt-4 font-serif text-xl text-navy">Required documents</h2>
             <ul className="mt-3 space-y-1 text-sm text-muted">
-              <li>CV</li>
-              <li>Degree certificate</li>
-              <li>Academic transcript</li>
+              <li>Degree / Certificate / Official Attestation</li>
+              <li>Academic Transcript / Statement of Result</li>
+              <li>CV / Resume</li>
               <li>Other supporting document (optional)</li>
             </ul>
             <p className="mt-3 text-xs text-muted">PDF, Word, JPEG, or PNG. 10 MB maximum per file.</p>
@@ -86,7 +86,8 @@ export default async function ApplyLanding() {
             <ListChecks className="h-8 w-8 text-orange" aria-hidden />
             <h2 className="mt-4 font-serif text-xl text-navy">Simple process</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted">
-              Six short steps: personal details, academics, programme, motivation, documents, then review and submit.
+              Five short steps: personal details, qualification, motivation, documents, then review and submit. Each
+              person may submit only one application for this intake.
             </p>
           </article>
         </div>

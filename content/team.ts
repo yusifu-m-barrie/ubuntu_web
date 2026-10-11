@@ -30,7 +30,7 @@ export function sortTeamMembers(members: TeamMember[]): TeamMember[] {
     .map((member) => {
       const name = member.name.toLowerCase();
       const role = member.role.toLowerCase();
-      if (name.includes("yusifu") || name.includes("isatu") || name.includes("magdalene")) {
+      if (name.includes("yusifu") || name.includes("isatu") || name.includes("magdalene") || name.includes("philip")) {
         return { ...member, role: "Junior Software Developer Level 1" };
       }
       if (name.includes("augustine") || name.includes("lukeman")) {
@@ -41,6 +41,9 @@ export function sortTeamMembers(members: TeamMember[]): TeamMember[] {
       }
       if (name.includes("john") || name.includes("momoh") || name.includes("andrew")) {
         return { ...member, role: "Junior Software Developer Level 2" };
+      }
+      if (name.includes("sullaiman") || name.includes("kamanda") || name.includes("mariama") || name.includes("omaru")) {
+        return { ...member, role: "Junior Software Developer" };
       }
       if (role.includes("coordinator") || (name.includes("daniel") && role.includes("project"))) {
         return { ...member, role: "Project Manager" };
@@ -139,25 +142,25 @@ export const teamMembers: TeamMember[] = [
   },
   {
     name: "Philip A. Sesay",
-    role: "Junior Software Developer",
+    role: "Junior Software Developer Level 1",
     photo: "/images/MG_2289-scaled.jpg",
     linkedin: "https://www.linkedin.com/in/philip-adikali-sesay-27721510a",
   },
   {
     name: "Sullaiman Kamanda",
-    role: "Postgraduate II",
+    role: "Junior Software Developer",
     photo: "/images/kaman.jpg",
     linkedin: "https://www.linkedin.com/in/sullaiman-kamanda-6b2634200",
   },
   {
     name: "Mariama Mansaray",
-    role: "Postgraduate II",
+    role: "Junior Software Developer",
     photo: "/images/ggnnnn-scaled.jpg",
     linkedin: "https://www.linkedin.com/in/mariama-mansaray-28077422a",
   },
   {
     name: "Omaru C. Kamara",
-    role: "Postgraduate II",
+    role: "Junior Software Developer",
     photo: "/images/ca2-scaled.jpg",
     linkedin: "https://www.linkedin.com/in/omaru-calla-kamara-130532207",
   },

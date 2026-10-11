@@ -14,8 +14,10 @@ import {
   siteSettings,
 } from "@/content/pages";
 import { sortTeamMembers, teamMembers, testimonials } from "@/content/team";
+import { applyStaffPositionsToAlumni } from "@/lib/people";
 
 export function getMigratedContent() {
+  const team = sortTeamMembers(teamMembers);
   return {
     settings: siteSettings,
     navigation,
@@ -28,9 +30,9 @@ export function getMigratedContent() {
     eventsList: eventsListPage,
     postgraduate: postgraduatePage,
     gallery: { ...galleryPage, images: galleryImages },
-    team: sortTeamMembers(teamMembers),
+    team,
     testimonials,
-    alumni,
+    alumni: applyStaffPositionsToAlumni(alumni, team),
   };
 }
 

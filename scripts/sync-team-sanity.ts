@@ -1,6 +1,8 @@
 import { createClient } from "@sanity/client";
+import { alumni } from "../content/alumni";
 import { homePage } from "../content/pages";
 import { sortTeamMembers, teamMembers } from "../content/team";
+import { applyStaffPositionsToAlumni, findPerson } from "../lib/people";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -120,6 +122,19 @@ async function main() {
   if (home && home.testimonialsSubtitle !== slogan) {
     transaction.patch(home._id, { set: { testimonialsSubtitle: slogan } });
     console.log(`Patch slogan: ${home.testimonialsSubtitle} -> ${slogan}`);
+  }
+
+  const alumniDocs = await client.fetch<Array<{ _id: string; name: string; job?: string }>>(
+    `*[_type == "alumni"]{_id,name,job}`,
+  );
+  const staffAlumni = applyStaffPositionsToAlumni(alumni, desired);
+  for (const person of staffAlumni) {
+    const member = findPerson(person.name, desired);
+    if (!member) continue;
+    const doc = findPerson(person.name, alumniDocs);
+    if (!doc || doc.job === member.role) continue;
+    transaction.patch(doc._id, { set: { job: member.role } });
+    console.log(`Patch alumni ${doc.name}: ${doc.job} -> ${member.role}`);
   }
 
   const result = await transaction.commit();

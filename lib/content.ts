@@ -1,5 +1,6 @@
 import { getMigratedContent, type MigratedContent } from "@/content";
 import { sortTeamMembers } from "@/content/team";
+import { applyStaffPositionsToAlumni } from "@/lib/people";
 import { sanityClient, sanityConfigured } from "@/lib/sanity/client";
 import { sanityImageUrl } from "@/lib/sanity/image";
 import { allContentQuery } from "@/lib/sanity/queries";
@@ -329,6 +330,11 @@ export const loadContent = cache(async (): Promise<MigratedContent> => {
 
   try {
     const data = (await sanityClient.fetch(allContentQuery, {}, { cache: "no-store", next: { tags: ["sanity"] } })) as Doc;
+    const team = mapTeam(Array.isArray(data.team) ? (data.team as Doc[]) : [], fallback.team);
+    const alumni = applyStaffPositionsToAlumni(
+      mapAlumni(Array.isArray(data.alumni) ? (data.alumni as Doc[]) : [], fallback.alumni),
+      team,
+    );
     return {
       ...fallback,
       settings: data.settings ? mapSettings(data.settings as Doc, fallback.settings) : fallback.settings,
@@ -348,12 +354,12 @@ export const loadContent = cache(async (): Promise<MigratedContent> => {
         ? mapPostgraduate(data.postgraduate as Doc, fallback.postgraduate)
         : fallback.postgraduate,
       gallery: data.gallery ? mapGallery(data.gallery as Doc, data.galleryImages, fallback.gallery) : fallback.gallery,
-      team: mapTeam(Array.isArray(data.team) ? (data.team as Doc[]) : [], fallback.team),
+      team,
       testimonials: mapTestimonials(
         Array.isArray(data.testimonials) ? (data.testimonials as Doc[]) : [],
         fallback.testimonials,
       ),
-      alumni: mapAlumni(Array.isArray(data.alumni) ? (data.alumni as Doc[]) : [], fallback.alumni),
+      alumni,
     };
   } catch {
     return fallback;

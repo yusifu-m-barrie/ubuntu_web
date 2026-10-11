@@ -1,35 +1,13 @@
 "use client";
 
 import { AlumniProfileModal } from "@/components/sections/AlumniProfileModal";
+import { findPerson } from "@/lib/people";
 import type { AlumniRecord } from "@/types/content";
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 
-const ALIASES: Record<string, string> = {
-  "alaji kanu": "alhaji kanu",
-  "abdulai brato": "abdulai kamara",
-  "isatu magdalene kamara": "isatu kamara",
-  "philip adikali sesay": "philip sesay",
-  "amadu wurie bah": "amadu bah",
-  "omaru calla kamara": "omaru kamara",
-  "john a kamara": "john kamara",
-};
-
-function normalize(name: string) {
-  return name.toLowerCase().replace(/\./g, "").replace(/\s+/g, " ").trim();
-}
-
-function nameKey(name: string) {
-  const aliased = ALIASES[normalize(name)] ?? normalize(name);
-  const parts = aliased.split(" ").filter(Boolean);
-  if (parts.length === 0) return "";
-  return `${parts[0]} ${parts[parts.length - 1]}`;
-}
-
 function linkedinFor(name: string, team: { name: string; linkedin?: string }[]) {
-  const key = nameKey(name);
-  const match = team.find((member) => member.linkedin && nameKey(member.name) === key);
-  return match?.linkedin;
+  return findPerson(name, team)?.linkedin;
 }
 
 export function CohortTabs({

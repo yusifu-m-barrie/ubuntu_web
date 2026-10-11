@@ -33,6 +33,12 @@ export function sortTeamMembers(members: TeamMember[]): TeamMember[] {
       if (name.includes("yusifu") || name.includes("isatu") || name.includes("magdalene")) {
         return { ...member, role: "Junior Software Developer Level 1" };
       }
+      if (name.includes("alhaji") || name.includes("gibrilla") || name.includes("brato") || (name.includes("abdulai") && name.includes("kamara"))) {
+        return { ...member, role: "Senior Software Developer Level 1" };
+      }
+      if (name.includes("john") || name.includes("momoh") || name.includes("andrew")) {
+        return { ...member, role: "Junior Software Developer Level 2" };
+      }
       if (role.includes("coordinator") || (name.includes("daniel") && role.includes("project"))) {
         return { ...member, role: "Project Manager" };
       }
@@ -81,21 +87,34 @@ export const teamMembers: TeamMember[] = [
   },
   {
     name: "Alhaji M. Kanu",
-    role: "Junior Software Developer Level 2",
+    role: "Senior Software Developer Level 1",
     photo: "/images/MG_2299-scaled.jpg",
     linkedin: "https://www.linkedin.com/in/mohamed-kanu",
   },
   {
     name: "Abdulai B. Kamara",
-    role: "Junior Software Developer Level 2",
+    role: "Senior Software Developer Level 1",
     photo: "/images/MG_2270-scaled.jpg",
     linkedin: "https://www.linkedin.com/in/abdulai-brato-kamara-075232114",
   },
   {
     name: "Gibrilla Kanu",
-    role: "Junior Software Developer Level 2",
+    role: "Senior Software Developer Level 1",
     photo: "/images/MG_2295-scaled.jpg",
     linkedin: "https://www.linkedin.com/in/gi-kanu-b7262a247",
+  },
+  {
+    name: "John A. Kamara",
+    role: "Junior Software Developer Level 2",
+    photo: "/images/MG_2280-scaled.jpg",
+    linkedin: "https://www.linkedin.com/in/john-abdul-kamara-0a002753",
+  },
+  { name: "Momoh Sesay", role: "Junior Software Developer Level 2", photo: "/images/MG_2279-copy-scaled.jpg" },
+  {
+    name: "Andrew A. O. Kamara",
+    role: "Junior Software Developer Level 2",
+    photo: "/images/MG_2272-scaled.jpg",
+    linkedin: "https://www.linkedin.com/in/kamara-abdul-a77841240",
   },
   {
     name: "Yusifu M. Barrie",
@@ -114,19 +133,6 @@ export const teamMembers: TeamMember[] = [
     role: "Junior Software Developer Level 1",
     photo: "/images/gggg-scaled.jpg",
     linkedin: "https://www.linkedin.com/in/amaduwbahofficial",
-  },
-  {
-    name: "John A. Kamara",
-    role: "Junior Software Developer Level 1",
-    photo: "/images/MG_2280-scaled.jpg",
-    linkedin: "https://www.linkedin.com/in/john-abdul-kamara-0a002753",
-  },
-  { name: "Momoh Sesay", role: "Junior Software Developer Level 1", photo: "/images/MG_2279-copy-scaled.jpg" },
-  {
-    name: "Andrew A. O. Kamara",
-    role: "Junior Software Developer Level 1",
-    photo: "/images/MG_2272-scaled.jpg",
-    linkedin: "https://www.linkedin.com/in/kamara-abdul-a77841240",
   },
   {
     name: "Philip A. Sesay",

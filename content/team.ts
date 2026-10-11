@@ -33,6 +33,9 @@ export function sortTeamMembers(members: TeamMember[]): TeamMember[] {
       if (name.includes("yusifu") || name.includes("isatu") || name.includes("magdalene")) {
         return { ...member, role: "Junior Software Developer Level 1" };
       }
+      if (name.includes("augustine") || name.includes("lukeman")) {
+        return { ...member, role: "Senior Software Developer Level 2" };
+      }
       if (name.includes("alhaji") || name.includes("gibrilla") || name.includes("brato") || (name.includes("abdulai") && name.includes("kamara"))) {
         return { ...member, role: "Senior Software Developer Level 1" };
       }
@@ -75,13 +78,13 @@ export const teamMembers: TeamMember[] = [
   { name: "Enmanuel Seguro Botega", role: "Senior Software Developer Level 2", photo: "/images/preving.jpeg" },
   {
     name: "Augustine S. Y. Matturi",
-    role: "Senior Software Developer Level 1",
+    role: "Senior Software Developer Level 2",
     photo: "/images/MG_2288-scaled.jpg",
     linkedin: "https://www.linkedin.com/in/augustine-matturi-293801b0",
   },
   {
     name: "Lukeman S. Kamara",
-    role: "Senior Software Developer Level 1",
+    role: "Senior Software Developer Level 2",
     photo: "/images/MG_2273-.jpg",
     linkedin: "https://www.linkedin.com/in/lukeman-s-kamara-660328143",
   },

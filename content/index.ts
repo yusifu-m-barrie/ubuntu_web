@@ -13,7 +13,7 @@ import {
   postgraduatePage,
   siteSettings,
 } from "@/content/pages";
-import { teamMembers, testimonials } from "@/content/team";
+import { sortTeamMembers, teamMembers, testimonials } from "@/content/team";
 
 export function getMigratedContent() {
   return {
@@ -28,7 +28,7 @@ export function getMigratedContent() {
     eventsList: eventsListPage,
     postgraduate: postgraduatePage,
     gallery: { ...galleryPage, images: galleryImages },
-    team: teamMembers,
+    team: sortTeamMembers(teamMembers),
     testimonials,
     alumni,
   };

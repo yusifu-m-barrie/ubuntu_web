@@ -1,4 +1,5 @@
 import { getMigratedContent, type MigratedContent } from "@/content";
+import { sortTeamMembers } from "@/content/team";
 import { sanityClient, sanityConfigured } from "@/lib/sanity/client";
 import { sanityImageUrl } from "@/lib/sanity/image";
 import { allContentQuery } from "@/lib/sanity/queries";
@@ -36,7 +37,10 @@ function mapNavigation(items: NavItem[]): NavItem[] {
 }
 
 function brandAfrika(value: string) {
-  return value.replaceAll("Ubuntu Tech Africa", "Ubuntu Tech Afrika").replaceAll("Ubuntu Africa", "Ubuntu Afrika");
+  return value
+    .replaceAll("Ubuntu Tech Africa", "Ubuntu Tech Afrika")
+    .replaceAll("Ubuntu Africa", "Ubuntu Afrika")
+    .replaceAll("I AM BECAUSE YOU ARE, YOU ARE BECAUSE OF ME, TOGETHER WE ARE UBUNTU", "I AM BECAUSE YOU ARE, TOGETHER WE ARE UBUNTU");
 }
 
 function text(value: unknown, fallback: string) {
@@ -274,14 +278,16 @@ function mapSettings(doc: Doc, fallback: SiteSettings): SiteSettings {
 
 function mapTeam(docs: Doc[], fallback: TeamMember[]): TeamMember[] {
   if (!docs.length) return fallback;
-  return docs
-    .map((doc, index) => ({
-      name: text(doc.name, ""),
-      role: text(doc.role, fallback[index]?.role || ""),
-      photo: sanityImageUrl(doc.photo, text(doc.photoUrl, fallback[index]?.photo || ""), doc._updatedAt),
-      linkedin: doc.linkedin ? String(doc.linkedin) : fallback[index]?.linkedin,
-    }))
-    .filter((member) => member.name);
+  return sortTeamMembers(
+    docs
+      .map((doc, index) => ({
+        name: text(doc.name, ""),
+        role: text(doc.role, fallback[index]?.role || ""),
+        photo: sanityImageUrl(doc.photo, text(doc.photoUrl, fallback[index]?.photo || ""), doc._updatedAt),
+        linkedin: doc.linkedin ? String(doc.linkedin) : fallback[index]?.linkedin,
+      }))
+      .filter((member) => member.name),
+  );
 }
 
 function mapTestimonials(docs: Doc[], fallback: Testimonial[]): Testimonial[] {

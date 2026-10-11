@@ -155,7 +155,7 @@ export const homePage: HomePage = {
   ],
   testimonialsTitle: "What beneficiaries are saying",
   testimonialsSubtitle:
-    "I AM BECAUSE YOU ARE, YOU ARE BECAUSE OF ME, TOGETHER WE ARE UBUNTU",
+    "I AM BECAUSE YOU ARE, TOGETHER WE ARE UBUNTU",
   partners: [
     { src: "/images/unimak-1.jpeg", alt: "UNIMAK" },
     { src: "/images/vitaly-1.png", alt: "Vitaly" },

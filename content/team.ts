@@ -1,10 +1,56 @@
 import type { TeamMember, Testimonial } from "@/types/content";
 
+function roleRank(role: string) {
+  const value = role.toLowerCase();
+  if (value.includes("president")) return 0;
+  if (value.includes("project manager") || value.includes("coordinator")) return 1;
+  if (value.includes("head of technology")) return 2;
+  if (value.includes("team head")) return 3;
+  if (value.includes("senior") && value.includes("level 2")) return 10;
+  if (value.includes("senior") && value.includes("level 1")) return 11;
+  if (value.includes("senior")) return 12;
+  if (value.includes("junior") && value.includes("level 2")) return 20;
+  if (value.includes("junior") && value.includes("level 1")) return 21;
+  if (value.includes("junior")) return 22;
+  if (value.includes("postgraduate")) return 30;
+  if (value.includes("clean") || value.includes("support")) return 40;
+  return 50;
+}
+
+function juniorLevelOneNameRank(name: string) {
+  const value = name.toLowerCase();
+  if (value.includes("yusifu")) return 0;
+  if (value.includes("isatu") || value.includes("magdalene")) return 1;
+  if (value.includes("amadu")) return 2;
+  return 10;
+}
+
+export function sortTeamMembers(members: TeamMember[]): TeamMember[] {
+  return members
+    .map((member) => {
+      const name = member.name.toLowerCase();
+      const role = member.role.toLowerCase();
+      if (name.includes("yusifu") || name.includes("isatu") || name.includes("magdalene")) {
+        return { ...member, role: "Junior Software Developer Level 1" };
+      }
+      if (role.includes("coordinator") || (name.includes("daniel") && role.includes("project"))) {
+        return { ...member, role: "Project Manager" };
+      }
+      return member;
+    })
+    .sort((left, right) => {
+      const byRole = roleRank(left.role) - roleRank(right.role);
+      if (byRole !== 0) return byRole;
+      if (roleRank(left.role) === 21) return juniorLevelOneNameRank(left.name) - juniorLevelOneNameRank(right.name);
+      return 0;
+    });
+}
+
 export const teamMembers: TeamMember[] = [
   { name: "Lorenzo Nieto Collado", role: "President", photo: "/images/lorenzo-1-1.jpg" },
   {
     name: "Daniel Salifu Samura",
-    role: "Project Coordinator",
+    role: "Project Manager",
     photo: "/images/MG_2303.jpg",
     linkedin: "https://www.linkedin.com/in/samura-daniel",
   },
@@ -52,18 +98,30 @@ export const teamMembers: TeamMember[] = [
     linkedin: "https://www.linkedin.com/in/gi-kanu-b7262a247",
   },
   {
+    name: "Yusifu M. Barrie",
+    role: "Junior Software Developer Level 1",
+    photo: "/images/MG_2285.jpg",
+    linkedin: "https://www.linkedin.com/in/yusifu-mohamed-barrie-1661a29b",
+  },
+  {
+    name: "Isatu M. Kamara",
+    role: "Junior Software Developer Level 1",
+    photo: "/images/maggi-1.jpg",
+    linkedin: "https://www.linkedin.com/in/isatu-magdalene-kamara-3a4267238",
+  },
+  {
+    name: "Amadu W. Bah",
+    role: "Junior Software Developer Level 1",
+    photo: "/images/gggg-scaled.jpg",
+    linkedin: "https://www.linkedin.com/in/amaduwbahofficial",
+  },
+  {
     name: "John A. Kamara",
     role: "Junior Software Developer Level 1",
     photo: "/images/MG_2280-scaled.jpg",
     linkedin: "https://www.linkedin.com/in/john-abdul-kamara-0a002753",
   },
   { name: "Momoh Sesay", role: "Junior Software Developer Level 1", photo: "/images/MG_2279-copy-scaled.jpg" },
-  {
-    name: "Isatu M. Kamara",
-    role: "Junior Software Developer",
-    photo: "/images/maggi-1.jpg",
-    linkedin: "https://www.linkedin.com/in/isatu-magdalene-kamara-3a4267238",
-  },
   {
     name: "Andrew A. O. Kamara",
     role: "Junior Software Developer Level 1",
@@ -75,18 +133,6 @@ export const teamMembers: TeamMember[] = [
     role: "Junior Software Developer",
     photo: "/images/MG_2289-scaled.jpg",
     linkedin: "https://www.linkedin.com/in/philip-adikali-sesay-27721510a",
-  },
-  {
-    name: "Yusifu M. Barrie",
-    role: "Junior Software Developer",
-    photo: "/images/MG_2285.jpg",
-    linkedin: "https://www.linkedin.com/in/yusifu-mohamed-barrie-1661a29b",
-  },
-  {
-    name: "Amadu W. Bah",
-    role: "Junior Software Developer Level 1",
-    photo: "/images/gggg-scaled.jpg",
-    linkedin: "https://www.linkedin.com/in/amaduwbahofficial",
   },
   {
     name: "Sullaiman Kamanda",
@@ -118,7 +164,7 @@ export const teamMembers: TeamMember[] = [
     photo: "/images/gifty-hemans.jpg",
     linkedin: "https://www.linkedin.com/in/gifty-hemans",
   },
-  { name: "Samuel Lebbie", role: "Cleaner", photo: "/images/lebbie-scaled.jpg" },
+  { name: "Samuel Lebbie", role: "Office Support Staff", photo: "/images/lebbie-scaled.jpg" },
 ];
 
 export const testimonials: Testimonial[] = [

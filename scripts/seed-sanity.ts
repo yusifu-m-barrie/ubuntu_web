@@ -14,7 +14,7 @@ import {
   postgraduatePage,
   siteSettings,
 } from "../content/pages";
-import { teamMembers, testimonials } from "../content/team";
+import { sortTeamMembers, teamMembers, testimonials } from "../content/team";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -288,7 +288,7 @@ async function seed() {
     heroSlides: await slideImages(galleryPage.heroSlides),
   });
 
-  for (const [index, member] of teamMembers.entries()) {
+  for (const [index, member] of sortTeamMembers(teamMembers).entries()) {
     await client.createOrReplace({
       _id: `teamMember.${index + 1}`,
       _type: "teamMember",

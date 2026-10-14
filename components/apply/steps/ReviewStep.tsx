@@ -77,7 +77,6 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
             <Row label="Date of birth" value={draft.personal.dateOfBirth} />
             <Row label="Gender" value={draft.personal.gender} />
             <Row label="District" value={draft.personal.district} />
-            <Row label="City" value={draft.personal.city} />
             <Row label="Address" value={draft.personal.address} />
           </dl>
         </section>

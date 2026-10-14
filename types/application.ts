@@ -36,7 +36,6 @@ export type PersonalInformation = {
   dateOfBirth: string;
   gender: string;
   district: string;
-  city: string;
   address: string;
 };
 
@@ -155,7 +154,6 @@ export type ApplicationSummary = {
   fullName: string;
   programme: string;
   district: string;
-  city: string;
   degree: string;
   fieldOfStudy: string;
   status: ApplicationStatus;

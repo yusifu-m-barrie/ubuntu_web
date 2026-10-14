@@ -25,7 +25,6 @@ export function toSummary(record: ApplicationRecord): ApplicationSummary {
     fullName: fullName(record.firstName, record.lastName, record.middleName),
     programme: record.programme,
     district: record.district,
-    city: record.city,
     degree: record.degree,
     fieldOfStudy: record.fieldOfStudy,
     status: record.status,

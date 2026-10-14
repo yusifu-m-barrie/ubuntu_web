@@ -5,7 +5,7 @@ import {
   GENDERS,
   MOTIVATION_MAX_CHARS,
 } from "@/lib/applications/constants";
-import { DISTRICTS, isCityInDistrict } from "@/lib/applications/locations";
+import { DISTRICTS } from "@/lib/applications/locations";
 import { ALLOWED_CONTENT_TYPES, MAX_FILE_BYTES, isSafeStorageKey } from "@/lib/applications/file-types";
 import { APPLICATION_STATUSES, DOCUMENT_KINDS } from "@/types/application";
 import { z } from "zod";
@@ -49,11 +49,7 @@ export const personalSchema = z.object({
     }, "Enter a valid date of birth."),
   gender: oneOf(GENDERS, "Select a gender option."),
   district: oneOf(DISTRICTS, "Select a district."),
-  city: required("City").max(80),
   address: required("Address").max(240),
-}).refine((value) => isCityInDistrict(value.district, value.city), {
-  message: "Select a city in the chosen district.",
-  path: ["city"],
 });
 
 export const academicSchema = z.object({

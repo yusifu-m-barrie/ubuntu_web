@@ -2,7 +2,7 @@
 
 import { describedBy, Field, focusFirstError, inputClass, StepActions } from "@/components/apply/Fields";
 import { GENDERS } from "@/lib/applications/constants";
-import { DISTRICTS, citiesForDistrict } from "@/lib/applications/locations";
+import { DISTRICTS } from "@/lib/applications/locations";
 import { personalSchema } from "@/lib/applications/schema";
 import type { PersonalInformation } from "@/types/application";
 import { useState } from "react";
@@ -140,39 +140,13 @@ export function PersonalStep({ value, onChange, onNext }: Props) {
           <select
             id="district"
             value={value.district}
-            onChange={(event) => {
-              const district = event.target.value;
-              const cities = citiesForDistrict(district);
-              onChange({
-                ...value,
-                district,
-                city: cities.includes(value.city) ? value.city : "",
-              });
-            }}
+            onChange={(event) => update("district", event.target.value)}
             className={inputClass}
             aria-invalid={Boolean(errors.district)}
             aria-describedby={describedBy("district", undefined, errors.district)}
           >
             <option value="">Select district</option>
             {DISTRICTS.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field id="city" label="City" required error={errors.city}>
-          <select
-            id="city"
-            value={value.city}
-            onChange={(event) => update("city", event.target.value)}
-            className={inputClass}
-            disabled={!value.district}
-            aria-invalid={Boolean(errors.city)}
-            aria-describedby={describedBy("city", undefined, errors.city)}
-          >
-            <option value="">{value.district ? "Select city" : "Select a district first"}</option>
-            {citiesForDistrict(value.district).map((item) => (
               <option key={item} value={item}>
                 {item}
               </option>

@@ -14,7 +14,6 @@ export function emptyDraft(): ApplicationDraft {
       dateOfBirth: "",
       gender: "",
       district: "",
-      city: "",
       address: "",
     },
     academic: {

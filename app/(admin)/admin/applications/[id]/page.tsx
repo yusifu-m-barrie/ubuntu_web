@@ -43,7 +43,7 @@ export default async function ApplicationDetail({ params }: { params: Promise<{ 
   }
 
   const name = fullName(application.firstName, application.lastName, application.middleName);
-  const address = [application.address, application.city, application.district].filter(Boolean).join(", ");
+  const address = [application.address, application.district].filter(Boolean).join(", ");
 
   return (
     <article>
@@ -93,7 +93,6 @@ export default async function ApplicationDetail({ params }: { params: Promise<{ 
           <Row label="Date of birth" value={formatAdminDay(application.dateOfBirth)} />
           <Row label="Gender" value={application.gender} />
           <Row label="District" value={application.district} />
-          <Row label="City" value={application.city} />
           <Row label="Address" value={address} />
         </dl>
       </section>

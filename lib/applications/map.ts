@@ -23,7 +23,7 @@ export function payloadToRecord(
     gender: payload.personal.gender,
     district: payload.personal.district,
     country: DEFAULT_COUNTRY,
-    city: payload.personal.city,
+    city: "",
     address: payload.personal.address,
     institution: payload.academic.institution,
     degree: payload.academic.degree,

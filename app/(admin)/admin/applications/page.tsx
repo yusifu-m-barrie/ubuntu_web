@@ -161,7 +161,7 @@ export default async function ApplicationsIndex({
                 </div>
                 <p className="mt-2 text-sm">{item.email}</p>
                 <p className="text-sm text-muted">
-                  {[item.district, item.city].filter(Boolean).join(", ") || "—"} · {item.degree || "—"}
+                  {item.district || "—"} · {item.degree || "—"}
                 </p>
                 <div className="mt-3 flex items-center justify-between gap-3">
                   <span className="text-xs text-muted">{formatAdminDate(item.submittedAt)}</span>

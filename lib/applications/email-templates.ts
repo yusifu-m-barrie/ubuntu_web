@@ -86,7 +86,6 @@ export function applicantConfirmationEmail(record: ApplicationRecord) {
     `Applicant name: ${name}`,
     `Programme: ${record.programme}`,
     `District: ${record.district}`,
-    `City: ${record.city}`,
     `Application reference: ${record.applicationReference}`,
     `Submission date: ${submitted}`,
     "",
@@ -106,7 +105,6 @@ export function applicantConfirmationEmail(record: ApplicationRecord) {
         ${detailRow("Applicant name", name)}
         ${detailRow("Programme", record.programme)}
         ${detailRow("District", record.district)}
-        ${detailRow("City", record.city)}
         ${detailRow("Application reference", record.applicationReference)}
         ${detailRow("Submission date", submitted)}
       </table>
@@ -132,7 +130,6 @@ export function adminNotificationEmail(record: ApplicationRecord, reviewUrl: str
     `Phone: ${record.phone}`,
     `Programme: ${record.programme}`,
     `District: ${record.district}`,
-    `City: ${record.city}`,
     `Field of study: ${record.fieldOfStudy}`,
     `Institution: ${record.institution}`,
     `Application reference: ${record.applicationReference}`,
@@ -153,7 +150,6 @@ export function adminNotificationEmail(record: ApplicationRecord, reviewUrl: str
         ${detailRow("Phone", record.phone)}
         ${detailRow("Programme", record.programme)}
         ${detailRow("District", record.district)}
-        ${detailRow("City", record.city)}
         ${detailRow("Field of study", record.fieldOfStudy)}
         ${detailRow("Institution", record.institution)}
         ${detailRow("Application reference", record.applicationReference)}

@@ -20,12 +20,3 @@ export const DISTRICT_CITIES = {
 export type DistrictName = keyof typeof DISTRICT_CITIES;
 
 export const DISTRICTS = Object.keys(DISTRICT_CITIES) as DistrictName[];
-
-export function citiesForDistrict(district: string): readonly string[] {
-  if (!district || !(district in DISTRICT_CITIES)) return [];
-  return DISTRICT_CITIES[district as DistrictName];
-}
-
-export function isCityInDistrict(district: string, city: string) {
-  return citiesForDistrict(district).includes(city);
-}

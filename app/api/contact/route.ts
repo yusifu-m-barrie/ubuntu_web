@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { mailFromAddress } from "@/lib/applications/mail";
 
 function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
   const { Resend } = await import("resend");
   const resend = new Resend(apiKey);
   const result = await resend.emails.send({
-    from: "Ubuntu Afrika <noreply@ubuntuafrika-sl.com>",
+    from: mailFromAddress(),
     to,
     replyTo: email,
     subject: `Website contact from ${firstName} ${lastName}`,

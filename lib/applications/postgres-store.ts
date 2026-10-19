@@ -1,7 +1,7 @@
-import { neon } from "@neondatabase/serverless";
 import { randomUUID } from "node:crypto";
 import { ADMIN_PAGE_SIZE, OPEN_APPLICATION_STATUSES } from "@/lib/applications/constants";
 import { emptyCounts } from "@/lib/applications/counts";
+import { queryRows, runQuery } from "@/lib/applications/db";
 import { ApplicationStorageError, DuplicateApplicationError } from "@/lib/applications/errors";
 import { DUPLICATE_APPLICATION_MESSAGE, identityFromPayload, isSameApplicant } from "@/lib/applications/identity";
 import {
@@ -23,12 +23,6 @@ import type {
 } from "@/types/application";
 import { APPLICATION_STATUSES } from "@/types/application";
 
-function sql() {
-  const url = process.env.POSTGRES_URL || process.env.DATABASE_URL;
-  if (!url) throw new ApplicationStorageError("POSTGRES_URL is not set.");
-  return neon(url);
-}
-
 const SELECT_COLUMNS = `
   id, draft_id, reference, first_name, middle_name, last_name, email, phone, date_of_birth, gender,
   country, district, city, address, institution, degree, field_of_study, graduation_year, grade_or_gpa,
@@ -41,14 +35,13 @@ let schemaReady = false;
 
 async function ensureSchema() {
   if (schemaReady) return;
-  const db = sql();
-  await db`
+  await runQuery(`
     CREATE TABLE IF NOT EXISTS application_counters (
       year INTEGER PRIMARY KEY,
       last_number INTEGER NOT NULL DEFAULT 0
     )
-  `;
-  await db`
+  `);
+  await runQuery(`
     CREATE TABLE IF NOT EXISTS applications (
       id TEXT PRIMARY KEY,
       draft_id TEXT UNIQUE NOT NULL,
@@ -89,7 +82,7 @@ async function ensureSchema() {
       cohort_year INTEGER,
       payload JSONB
     )
-  `;
+  `);
 
   const alters = [
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS first_name TEXT NOT NULL DEFAULT ''",
@@ -234,39 +227,32 @@ function rowToRecord(row: ApplicationRow): ApplicationRecord {
 }
 
 async function nextReference(year: number) {
-  const db = sql();
-  await db`
-    INSERT INTO application_counters (year, last_number)
-    VALUES (${year}, 1)
-    ON CONFLICT (year)
-    DO UPDATE SET last_number = application_counters.last_number + 1
-  `;
-  const rows = await db`
-    SELECT last_number FROM application_counters WHERE year = ${year}
-  `;
-  return formatReference(year, Number((rows[0] as { last_number: number }).last_number));
+  await runQuery(
+    `INSERT INTO application_counters (year, last_number)
+     VALUES ($1, 1)
+     ON CONFLICT (year)
+     DO UPDATE SET last_number = application_counters.last_number + 1`,
+    [year],
+  );
+  const rows = await queryRows<{ last_number: number }>(
+    `SELECT last_number FROM application_counters WHERE year = $1`,
+    [year],
+  );
+  return formatReference(year, Number(rows[0]?.last_number));
 }
 
 function isUniqueViolation(error: unknown) {
   return typeof error === "object" && error !== null && "code" in error && String(error.code) === "23505";
 }
 
-async function queryRows(text: string, params: unknown[] = []) {
-  return (await sql().query(text, params)) as ApplicationRow[];
-}
-
-async function runQuery(text: string, params: unknown[] = []) {
-  await sql().query(text, params);
-}
-
 export const postgresStore: ApplicationStore = {
   async create({ draftId, payload }) {
     await ensureSchema();
-    const db = sql();
     const year = cohortYear();
-    const existingDraft = (await db`
-      SELECT id FROM applications WHERE draft_id = ${draftId} LIMIT 1
-    `) as { id: string }[];
+    const existingDraft = await queryRows<{ id: string }>(
+      `SELECT id FROM applications WHERE draft_id = $1 LIMIT 1`,
+      [draftId],
+    );
     if (existingDraft[0]) {
       const current = await this.get(existingDraft[0].id);
       if (current) return current;
@@ -292,30 +278,65 @@ export const postgresStore: ApplicationStore = {
     });
 
     try {
-      await db`
-        INSERT INTO applications (
+      await runQuery(
+        `INSERT INTO applications (
           id, draft_id, reference, first_name, middle_name, last_name, email, phone, date_of_birth, gender,
           country, district, city, address, institution, degree, field_of_study, graduation_year, grade_or_gpa,
           additional_qualifications, programme, areas_of_interest, motivation, career_goals, relevant_experience,
           additional_information, cv, certificate, transcript, other_document, status, submitted_at, updated_at,
           admin_notes, cohort_year, history
         ) VALUES (
-          ${record.id}, ${draftId}, ${record.applicationReference}, ${record.firstName}, ${record.middleName},
-          ${record.lastName}, ${record.email}, ${record.phone}, ${record.dateOfBirth}, ${record.gender},
-          ${record.country}, ${record.district}, ${record.city}, ${record.address}, ${record.institution}, ${record.degree},
-          ${record.fieldOfStudy}, ${Number(record.graduationYear)}, ${record.gradeOrGPA},
-          ${record.additionalQualifications}, ${record.programme}, ${record.areasOfInterest}, ${record.motivation},
-          ${record.careerGoals}, ${record.relevantExperience}, ${record.additionalInformation},
-          ${record.cv}, ${record.certificate}, ${record.transcript}, ${record.otherDocument},
-          ${record.status}, ${record.submittedAt}, ${record.updatedAt}, ${record.adminNotes}, ${record.cohortYear},
-          ${JSON.stringify(record.history)}
-        )
-      `;
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+          $11, $12, $13, $14, $15, $16, $17, $18, $19,
+          $20, $21, $22, $23, $24, $25, $26,
+          $27::jsonb, $28::jsonb, $29::jsonb, $30::jsonb,
+          $31, $32, $33, $34, $35, $36::jsonb
+        )`,
+        [
+          record.id,
+          draftId,
+          record.applicationReference,
+          record.firstName,
+          record.middleName,
+          record.lastName,
+          record.email,
+          record.phone,
+          record.dateOfBirth,
+          record.gender,
+          record.country,
+          record.district,
+          record.city,
+          record.address,
+          record.institution,
+          record.degree,
+          record.fieldOfStudy,
+          Number(record.graduationYear),
+          record.gradeOrGPA,
+          record.additionalQualifications,
+          record.programme,
+          record.areasOfInterest,
+          record.motivation,
+          record.careerGoals,
+          record.relevantExperience,
+          record.additionalInformation,
+          JSON.stringify(record.cv),
+          JSON.stringify(record.certificate),
+          JSON.stringify(record.transcript),
+          JSON.stringify(record.otherDocument),
+          record.status,
+          record.submittedAt,
+          record.updatedAt,
+          record.adminNotes,
+          record.cohortYear,
+          JSON.stringify(record.history),
+        ],
+      );
     } catch (error) {
       if (isUniqueViolation(error)) {
-        const raced = (await db`
-          SELECT id FROM applications WHERE draft_id = ${draftId} LIMIT 1
-        `) as { id: string }[];
+        const raced = await queryRows<{ id: string }>(
+          `SELECT id FROM applications WHERE draft_id = $1 LIMIT 1`,
+          [draftId],
+        );
         if (raced[0]) {
           const current = await this.get(raced[0].id);
           if (current) return current;

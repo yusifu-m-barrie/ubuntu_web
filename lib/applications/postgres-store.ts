@@ -180,6 +180,25 @@ function asFile(value: unknown): FileReference | null {
   };
 }
 
+function asFiles(value: unknown): FileReference[] {
+  let parsed = value;
+
+  if (typeof parsed === "string") {
+    try {
+      parsed = JSON.parse(parsed) as unknown;
+    } catch {
+      return [];
+    }
+  }
+
+  if (Array.isArray(parsed)) {
+    return parsed.map(asFile).filter((file): file is FileReference => file !== null);
+  }
+
+  const legacyFile = asFile(parsed);
+  return legacyFile ? [legacyFile] : [];
+}
+
 function rowToRecord(row: ApplicationRow): ApplicationRecord {
   const submitted = row.submitted_at || row.created_at;
   const areas = Array.isArray(row.areas_of_interest)
@@ -214,7 +233,7 @@ function rowToRecord(row: ApplicationRow): ApplicationRecord {
     cv: asFile(row.cv),
     certificate: asFile(row.certificate),
     transcript: asFile(row.transcript),
-    otherDocument: asFile(row.other_document),
+    otherDocument: asFiles(row.other_document),
     status: (row.status as ApplicationStatus) || "NEW",
     submittedAt: submitted ? new Date(String(submitted)).toISOString() : new Date().toISOString(),
     updatedAt: row.updated_at ? new Date(String(row.updated_at)).toISOString() : new Date().toISOString(),

@@ -38,6 +38,13 @@ export type PersonalInformation = {
   district: string;
   address: string;
 };
+export type AdditionalQualification = {
+  institution: string;
+  degree: string;
+  fieldOfStudy: string;
+  graduationYear: string;
+  gradeOrGPA: string;
+};
 
 export type AcademicInformation = {
   institution: string;
@@ -45,7 +52,7 @@ export type AcademicInformation = {
   fieldOfStudy: string;
   graduationYear: string;
   gradeOrGPA: string;
-  additionalQualifications: string;
+  additionalQualifications: AdditionalQualification[];
 };
 
 export type ProgrammeInformation = {
@@ -64,7 +71,11 @@ export type ApplicationDocuments = {
   cv: FileReference;
   certificate: FileReference;
   transcript: FileReference;
-  otherDocument?: FileReference;
+  otherDocument?: FileReference[];
+};
+
+export type DraftDocuments = Partial<Record<RequiredDocumentKind, FileReference>> & {
+  otherDocument?: FileReference[];
 };
 
 export type ApplicationPayload = {
@@ -124,7 +135,7 @@ export type ApplicationRecord = {
   cv: FileReference | null;
   certificate: FileReference | null;
   transcript: FileReference | null;
-  otherDocument: FileReference | null;
+  otherDocument: FileReference [];
   status: ApplicationStatus;
   submittedAt: string;
   updatedAt: string;
@@ -143,7 +154,7 @@ export type ApplicationDraft = {
   academic: AcademicInformation;
   programme: ProgrammeInformation;
   questions: ApplicationQuestions;
-  documents: Partial<Record<DocumentKind, FileReference>>;
+  documents: DraftDocuments;
   declaration: boolean;
 };
 

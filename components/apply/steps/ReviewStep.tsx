@@ -5,6 +5,7 @@ import { DOCUMENT_KINDS, DOCUMENT_LABELS } from "@/lib/applications/constants";
 import { fullName } from "@/lib/applications/reference";
 import type { ApplicationDraft } from "@/types/application";
 import { useEffect, useState } from "react";
+import React from "react";
 
 type Props = {
   draft: ApplicationDraft;
@@ -94,7 +95,16 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
             <Row label="Field of study" value={draft.academic.fieldOfStudy} />
             <Row label="Graduation year" value={draft.academic.graduationYear} />
             <Row label="Grade / GPA" value={draft.academic.gradeOrGPA} />
-            <Row label="Additional" value={draft.academic.additionalQualifications} />
+            {/* <Row label="Additional" value={draft.academic.additionalQualifications} /> */}
+            {draft.academic.additionalQualifications.map((qualification, index) => (
+              <React.Fragment key={index}>
+                <Row label={`Additional qualification ${index + 1} — Institution`} value={qualification.institution} />
+                <Row label={`Additional qualification ${index + 1} — Degree`} value={qualification.degree} />
+                <Row label={`Additional qualification ${index + 1} — Field of study`} value={qualification.fieldOfStudy} />
+                <Row label={`Additional qualification ${index + 1} — Graduation year`} value={qualification.graduationYear} />
+                <Row label={`Additional qualification ${index + 1} — Grade / GPA`} value={qualification.gradeOrGPA} />
+              </React.Fragment>
+            ))}
           </dl>
         </section>
 
@@ -121,14 +131,31 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
             </button>
           </header>
           <ul className="space-y-2 text-sm">
-            {DOCUMENT_KINDS.map((kind) => (
-              <li key={kind} className="flex min-w-0 justify-between gap-3">
-                <span className="min-w-0 shrink-0 text-muted">{DOCUMENT_LABELS[kind]}</span>
-                <span className="min-w-0 overflow-hidden break-words text-right font-medium text-navy [overflow-wrap:anywhere]">
-                  {draft.documents[kind]?.filename || (kind === "otherDocument" ? "Not provided" : "Missing")}
-                </span>
-              </li>
-            ))}
+            {DOCUMENT_KINDS.map((kind) => {
+              if (kind === "otherDocument") {
+                const files = draft.documents.otherDocument ?? [];
+
+                return (
+                  <li key={kind} className="flex min-w-0 justify-between gap-3">
+                    <span className="min-w-0 shrink-0 text-muted">{DOCUMENT_LABELS[kind]}</span>
+                    <span className="min-w-0 overflow-hidden break-words text-right font-medium text-navy [overflow-wrap:anywhere]">
+                      {files.length ? files.map((file) => file.filename).join(", ") : "Not provided"}
+                    </span>
+                  </li>
+                );
+              }
+
+              const file = draft.documents[kind];
+
+              return (
+                <li key={kind} className="flex min-w-0 justify-between gap-3">
+                  <span className="min-w-0 shrink-0 text-muted">{DOCUMENT_LABELS[kind]}</span>
+                  <span className="min-w-0 overflow-hidden break-words text-right font-medium text-navy [overflow-wrap:anywhere]">
+                    {file?.filename || "Missing"}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </section>
 

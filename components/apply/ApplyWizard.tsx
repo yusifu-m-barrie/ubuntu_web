@@ -10,8 +10,67 @@ import { SuccessPanel } from "@/components/apply/SuccessPanel";
 import { DEFAULT_PROGRAMME, DRAFT_STORAGE_KEY } from "@/lib/applications/constants";
 import { emptyDraft } from "@/lib/applications/draft";
 import { applicationPayloadSchema } from "@/lib/applications/schema";
-import type { ApplicationDraft } from "@/types/application";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { AdditionalQualification, ApplicationDraft, FileReference } from "@/types/application";
+
+
+function normalizeAdditionalQualification(value: unknown): AdditionalQualification | null {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const item = value as Record<string, unknown>;
+    return {
+      institution: typeof item.institution === "string" ? item.institution : "",
+      degree: typeof item.degree === "string" ? item.degree : "",
+      fieldOfStudy: typeof item.fieldOfStudy === "string" ? item.fieldOfStudy : "",
+      graduationYear: typeof item.graduationYear === "string" ? item.graduationYear : "",
+      gradeOrGPA: typeof item.gradeOrGPA === "string" ? item.gradeOrGPA : "",
+    };
+  }
+
+  return null;
+}
+
+function normalizeAdditionalQualifications(value: unknown): AdditionalQualification[] {
+  const entries = Array.isArray(value) ? value : value ? [value] : [];
+
+  return entries.slice(0, 2).flatMap((entry) => {
+    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+      return [];
+    }
+
+    const item = entry as Record<string, unknown>;
+    return [
+      {
+        institution: typeof item.institution === "string" ? item.institution : "",
+        degree: typeof item.degree === "string" ? item.degree : "",
+        fieldOfStudy: typeof item.fieldOfStudy === "string" ? item.fieldOfStudy : "",
+        graduationYear: typeof item.graduationYear === "string" ? item.graduationYear : "",
+        gradeOrGPA: typeof item.gradeOrGPA === "string" ? item.gradeOrGPA : "",
+      },
+    ];
+  });
+}
+
+function normalizeOtherDocuments(value: unknown): FileReference[] {
+  const entries = Array.isArray(value) ? value : value ? [value] : [];
+
+  return entries.filter(
+    (entry): entry is FileReference =>
+      typeof entry === "object" &&
+      entry !== null &&
+      "filename" in entry &&
+      typeof entry.filename === "string" &&
+      "pathname" in entry &&
+      typeof entry.pathname === "string" &&
+      "contentType" in entry &&
+      typeof entry.contentType === "string" &&
+      "size" in entry &&
+      typeof entry.size === "number" &&
+      "kind" in entry &&
+      typeof entry.kind === "string" &&
+      "storage" in entry &&
+      (entry.storage === "blob" || entry.storage === "local"),
+  );
+}
 
 function readDraft(): ApplicationDraft {
   if (typeof window === "undefined") return emptyDraft();
@@ -26,10 +85,21 @@ function readDraft(): ApplicationDraft {
       ...parsed,
       step: Math.min(Math.max(parsed.step || 1, 1), 5),
       personal: { ...base.personal, ...parsed.personal },
-      academic: { ...base.academic, ...parsed.academic },
+      // academic: { ...base.academic, ...parsed.academic },
+      academic: {
+        ...base.academic,
+        ...parsed.academic,
+        additionalQualifications: normalizeAdditionalQualifications(
+          parsed.academic?.additionalQualifications
+        ),
+      },
       programme: { programme: DEFAULT_PROGRAMME, areasOfInterest: [] },
       questions: { ...base.questions, ...parsed.questions },
-      documents: parsed.documents || {},
+      documents: {
+  ...base.documents,
+  ...parsed.documents,
+  otherDocument: normalizeOtherDocuments(parsed.documents?.otherDocument),
+},
     };
   } catch {
     return emptyDraft();

@@ -16,9 +16,20 @@ type Props = {
 export function PersonalStep({ value, onChange, onNext }: Props) {
   const [errors, setErrors] = useState<Partial<Record<keyof PersonalInformation, string>>>({});
 
+  // function update<K extends keyof PersonalInformation>(key: K, next: PersonalInformation[K]) {
+  //   onChange({ ...value, [key]: next });
+  // }
+
   function update<K extends keyof PersonalInformation>(key: K, next: PersonalInformation[K]) {
-    onChange({ ...value, [key]: next });
+  onChange({ ...value, [key]: next });
+  setErrors((current) => {
+    if (!current[key]) return current;
+    const updated = { ...current };
+    delete updated[key];
+    return updated;
+  });
   }
+
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();

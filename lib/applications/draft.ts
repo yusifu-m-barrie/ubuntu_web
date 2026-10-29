@@ -22,7 +22,7 @@ export function emptyDraft(): ApplicationDraft {
       fieldOfStudy: "",
       graduationYear: "",
       gradeOrGPA: "",
-      additionalQualifications: "",
+      additionalQualifications: [],
     },
     programme: {
       programme: DEFAULT_PROGRAMME,
@@ -34,7 +34,9 @@ export function emptyDraft(): ApplicationDraft {
       relevantExperience: "",
       additionalInformation: "",
     },
-    documents: {},
+    documents: {
+      otherDocument: [],
+    },
     declaration: false,
   };
 }

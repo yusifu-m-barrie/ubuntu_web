@@ -30,7 +30,19 @@ export function payloadToRecord(
     fieldOfStudy: payload.academic.fieldOfStudy,
     graduationYear: payload.academic.graduationYear,
     gradeOrGPA: payload.academic.gradeOrGPA,
-    additionalQualifications: payload.academic.additionalQualifications,
+    // additionalQualifications: payload.academic.additionalQualifications,
+    additionalQualifications: payload.academic.additionalQualifications
+      .map((qualification, index) =>
+        [
+          `Additional qualification ${index + 1}:`,
+          `Institution: ${qualification.institution}`,
+          `Degree: ${qualification.degree}`,
+          `Field of study: ${qualification.fieldOfStudy}`,
+          `Graduation year: ${qualification.graduationYear}`,
+          `Grade / GPA: ${qualification.gradeOrGPA}`,
+        ].join("\n"),
+      )
+      .join("\n\n"),
     programme: payload.programme.programme || DEFAULT_PROGRAMME,
     areasOfInterest: payload.programme.areasOfInterest,
     motivation: payload.questions.motivation,
@@ -40,12 +52,24 @@ export function payloadToRecord(
     cv: payload.documents.cv,
     certificate: payload.documents.certificate,
     transcript: payload.documents.transcript,
-    otherDocument: payload.documents.otherDocument || null,
+    otherDocument: payload.documents.otherDocument ?? [],
     ...extras,
   };
 }
 
-export function documentFromRecord(record: ApplicationRecord, kind: DocumentKind): FileReference | null {
+// export function documentFromRecord(record: ApplicationRecord, kind: DocumentKind): FileReference | null {
+//   return record[kind];
+// }
+
+export function documentFromRecord(
+  record: ApplicationRecord,
+  kind: DocumentKind,
+  index = 0,
+): FileReference | null {
+  if (kind === "otherDocument") {
+    return record.otherDocument[index] ?? null;
+  }
+
   return record[kind];
 }
 

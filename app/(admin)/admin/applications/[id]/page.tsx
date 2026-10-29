@@ -133,29 +133,66 @@ export default async function ApplicationDetail({ params }: { params: Promise<{ 
         <h2 className="font-serif text-xl text-navy">Documents</h2>
         <ul className="mt-4 space-y-3">
           {DOCUMENT_KINDS.map((kind) => {
-            const file = documentFromRecord(application, kind);
-            return (
-              <li key={kind} className="flex flex-col gap-2 rounded-xl bg-cream px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm font-medium text-navy">{DOCUMENT_LABELS[kind]}</p>
-                  <p className="text-xs text-muted">
-                    {file ? `${file.filename} · ${formatBytes(file.size)}` : kind === "otherDocument" ? "Not provided" : "Missing"}
-                  </p>
-                </div>
-                {file ? (
+  if (kind === "otherDocument") {
+    const files = application.otherDocument ?? [];
+
+    return (
+      <li
+        key={kind}
+        className="flex flex-col gap-2 rounded-xl bg-cream px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <p className="text-sm font-medium text-navy">{DOCUMENT_LABELS[kind]}</p>
+          {files.length ? (
+            <ul className="space-y-1">
+              {files.map((file, index) => (
+                <li key={`${file.pathname}-${index}`} className="text-xs text-muted">
+                  {file.filename} · {formatBytes(file.size)}{" "}
                   <a
-                    href={`/api/admin/applications/${application.id}/files/${kind}`}
+                    href={`/api/admin/applications/${application.id}/files/otherDocument?index=${index}`}
                     download
-                    className="inline-flex rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-soft"
+                    className="font-semibold text-orange hover:underline"
                   >
                     Download
                   </a>
-                ) : (
-                  <span className="text-sm text-muted">No file</span>
-                )}
-              </li>
-            );
-          })}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-muted">Not provided</p>
+          )}
+        </div>
+      </li>
+    );
+  }
+
+  const file = documentFromRecord(application, kind);
+
+  return (
+    <li
+      key={kind}
+      className="flex flex-col gap-2 rounded-xl bg-cream px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div>
+        <p className="text-sm font-medium text-navy">{DOCUMENT_LABELS[kind]}</p>
+        <p className="text-xs text-muted">
+          {file ? `${file.filename} · ${formatBytes(file.size)}` : "Missing"}
+        </p>
+      </div>
+      {file ? (
+        <a
+          href={`/api/admin/applications/${application.id}/files/${kind}`}
+          download
+          className="inline-flex rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-soft"
+        >
+          Download
+        </a>
+      ) : (
+        <span className="text-sm text-muted">No file</span>
+      )}
+    </li>
+  );
+})}
         </ul>
       </section>
 

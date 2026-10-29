@@ -4,11 +4,14 @@ import {
   FIELDS_OF_STUDY,
   GENDERS,
   MOTIVATION_MAX_CHARS,
+  MOTIVATION_MIN_WORDS,
+  MOTIVATION_MAX_WORDS,
 } from "@/lib/applications/constants";
 import { DISTRICTS } from "@/lib/applications/locations";
 import { ALLOWED_CONTENT_TYPES, MAX_FILE_BYTES, isSafeStorageKey } from "@/lib/applications/file-types";
 import { APPLICATION_STATUSES, DOCUMENT_KINDS } from "@/types/application";
 import { z } from "zod";
+
 
 const required = (label: string) => z.string().trim().min(1, `${label} is required.`);
 
@@ -52,21 +55,43 @@ export const personalSchema = z.object({
   address: required("Address").max(240),
 });
 
+
+const graduationYearSchema = z
+  .string()
+  .trim()
+  .regex(/^(19|20)\d{2}$/, "Enter a valid graduation year.")
+  .refine((value) => {
+    const year = Number(value);
+    const max = new Date().getUTCFullYear() + 1;
+    return year >= 1980 && year <= max;
+  }, "Enter a valid graduation year.");
+
+const optionalGraduationYearSchema = z.string().trim().refine(
+  (value) => value === "" || graduationYearSchema.safeParse(value).success,
+  "Enter a valid graduation year.",
+);
+
+const optionalQualificationSchema = z.object({
+  institution: z.string().trim().max(160),
+  degree: z.string().trim().refine(
+    (value) => value === "" || DEGREES.some((option) => option === value),
+    "Select your degree.",
+  ),
+  fieldOfStudy: z.string().trim().refine(
+    (value) => value === "" || FIELDS_OF_STUDY.some((option) => option === value),
+    "Select your field of study.",
+  ),
+  graduationYear: optionalGraduationYearSchema,
+  gradeOrGPA: z.string().trim().max(80),
+});
+
 export const academicSchema = z.object({
   institution: required("Institution").max(160),
   degree: oneOf(DEGREES, "Select your degree."),
   fieldOfStudy: oneOf(FIELDS_OF_STUDY, "Select your field of study."),
-  graduationYear: z
-    .string()
-    .trim()
-    .regex(/^(19|20)\d{2}$/, "Enter a valid graduation year.")
-    .refine((value) => {
-      const year = Number(value);
-      const max = new Date().getUTCFullYear() + 1;
-      return year >= 1980 && year <= max;
-    }, "Enter a valid graduation year."),
+  graduationYear: graduationYearSchema,
   gradeOrGPA: z.string().trim().max(80),
-  additionalQualifications: z.string().trim().max(1000),
+  additionalQualifications: z.array(optionalQualificationSchema).max(2),
 });
 
 export const programmeSchema = z
@@ -79,9 +104,34 @@ export const programmeSchema = z
     areasOfInterest: [] as string[],
   }));
 
+
+function requiredWordCountText() {
+  return z.string().trim().superRefine((value, context) => {
+    const wordCount = value ? value.split(/\s+/).length : 0;
+
+    if (wordCount < MOTIVATION_MIN_WORDS) {
+      context.addIssue({
+        code: "custom",
+        message: "Please enter at least 50 words.",
+      });
+    } else if (wordCount > MOTIVATION_MAX_WORDS) {
+      context.addIssue({
+        code: "custom",
+        message: "You cannot enter more than 250 words.",
+      });
+    }
+  });
+}
+
 export const questionsSchema = z.object({
-  motivation: required("Motivation").max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
-  careerGoals: required("Career goals").max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
+  // motivation: requiredWordCountText(),
+  // careerGoals: requiredWordCountText(),
+  motivation: required("Motivation")
+    .min(50, "Please enter at least 50 characters.")
+    .max(MOTIVATION_MAX_CHARS, "You cannot enter more than 250 characters."),
+  careerGoals: required("Career goals")
+    .min(50, "Please enter at least 50 characters.")
+    .max(MOTIVATION_MAX_CHARS, "You cannot enter more than 250 characters."),
   relevantExperience: z.string().trim().max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
   additionalInformation: z.string().trim().max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
 });
@@ -109,7 +159,7 @@ export const documentsSchema = z.object({
   cv: fileReferenceSchema,
   certificate: fileReferenceSchema,
   transcript: fileReferenceSchema,
-  otherDocument: fileReferenceSchema.optional(),
+  otherDocument: z.array(fileReferenceSchema).optional(),
 });
 
 export const applicationPayloadSchema = z.object({

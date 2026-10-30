@@ -162,7 +162,7 @@ export function AcademicStep({ value, onChange, onNext, onBack }: Props) {
       for (const issue of result.error.issues) {
         const [first, second, third] = issue.path;
         const id =
-          first === "additionalQualification" && typeof second === "number" && typeof third === "string"
+          first === "additionalQualifications" && typeof second === "number" && typeof third === "string"
             ? `additionalQualification-${second}-${third}`
             : typeof first === "string"
               ? first

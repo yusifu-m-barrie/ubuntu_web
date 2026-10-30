@@ -105,6 +105,24 @@ export default async function ApplicationDetail({ params }: { params: Promise<{ 
           <Row label="Field" value={application.fieldOfStudy} />
           <Row label="Graduation year" value={application.graduationYear} />
           <Row label="GPA / grade" value={application.gradeOrGPA || "—"} />
+          {application.additionalQualifications.map((qualification, index) => (
+            <div key={`additional-${index}`} className="contents">
+              <Row
+                label={`Additional qualification ${index + 1} — Institution`}
+                value={qualification.institution}
+              />
+              <Row label={`Additional qualification ${index + 1} — Degree`} value={qualification.degree} />
+              <Row label={`Additional qualification ${index + 1} — Field`} value={qualification.fieldOfStudy} />
+              <Row
+                label={`Additional qualification ${index + 1} — Graduation year`}
+                value={qualification.graduationYear}
+              />
+              <Row
+                label={`Additional qualification ${index + 1} — GPA / grade`}
+                value={qualification.gradeOrGPA || "—"}
+              />
+            </div>
+          ))}
         </dl>
       </section>
 

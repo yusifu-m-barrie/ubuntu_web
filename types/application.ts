@@ -125,7 +125,7 @@ export type ApplicationRecord = {
   fieldOfStudy: string;
   graduationYear: string;
   gradeOrGPA: string;
-  additionalQualifications: string;
+  additionalQualifications: AdditionalQualification[];
   programme: string;
   areasOfInterest: string[];
   motivation: string;
@@ -135,7 +135,7 @@ export type ApplicationRecord = {
   cv: FileReference | null;
   certificate: FileReference | null;
   transcript: FileReference | null;
-  otherDocument: FileReference [];
+  otherDocument: FileReference[];
   status: ApplicationStatus;
   submittedAt: string;
   updatedAt: string;

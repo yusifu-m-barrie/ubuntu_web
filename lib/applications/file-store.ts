@@ -12,7 +12,7 @@ import {
   submittedHistoryEvent,
   withHistory,
 } from "@/lib/applications/history";
-import { payloadToRecord } from "@/lib/applications/map";
+import { normalizeStoredRecord, payloadToRecord } from "@/lib/applications/map";
 import { cohortYear, formatReference, fullName, toSummary } from "@/lib/applications/reference";
 import type { ApplicationStore } from "@/lib/applications/store";
 import type { ApplicationListQuery, ApplicationRecord } from "@/types/application";
@@ -28,7 +28,11 @@ const dbPath = () => path.join(process.cwd(), ".data", "applications.json");
 async function readDb(): Promise<FileDb> {
   try {
     const raw = await fs.readFile(dbPath(), "utf8");
-    return JSON.parse(raw) as FileDb;
+    const parsed = JSON.parse(raw) as FileDb;
+    return {
+      ...parsed,
+      applications: (parsed.applications || []).map(normalizeStoredRecord),
+    };
   } catch {
     return { lastNumbers: {}, applications: [], drafts: {} };
   }

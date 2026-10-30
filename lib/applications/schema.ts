@@ -4,8 +4,6 @@ import {
   FIELDS_OF_STUDY,
   GENDERS,
   MOTIVATION_MAX_CHARS,
-  MOTIVATION_MIN_WORDS,
-  MOTIVATION_MAX_WORDS,
 } from "@/lib/applications/constants";
 import { DISTRICTS } from "@/lib/applications/locations";
 import { ALLOWED_CONTENT_TYPES, MAX_FILE_BYTES, isSafeStorageKey } from "@/lib/applications/file-types";
@@ -91,7 +89,17 @@ export const academicSchema = z.object({
   fieldOfStudy: oneOf(FIELDS_OF_STUDY, "Select your field of study."),
   graduationYear: graduationYearSchema,
   gradeOrGPA: z.string().trim().max(80),
-  additionalQualifications: z.array(optionalQualificationSchema).max(2),
+  additionalQualifications: z
+    .array(optionalQualificationSchema)
+    .max(2)
+    .default([])
+    .transform((items) =>
+      items.filter((item) =>
+        [item.institution, item.degree, item.fieldOfStudy, item.graduationYear, item.gradeOrGPA].some((value) =>
+          value.trim(),
+        ),
+      ),
+    ),
 });
 
 export const programmeSchema = z
@@ -105,27 +113,7 @@ export const programmeSchema = z
   }));
 
 
-function requiredWordCountText() {
-  return z.string().trim().superRefine((value, context) => {
-    const wordCount = value ? value.split(/\s+/).length : 0;
-
-    if (wordCount < MOTIVATION_MIN_WORDS) {
-      context.addIssue({
-        code: "custom",
-        message: "Please enter at least 50 words.",
-      });
-    } else if (wordCount > MOTIVATION_MAX_WORDS) {
-      context.addIssue({
-        code: "custom",
-        message: "You cannot enter more than 250 words.",
-      });
-    }
-  });
-}
-
 export const questionsSchema = z.object({
-  // motivation: requiredWordCountText(),
-  // careerGoals: requiredWordCountText(),
   motivation: required("Motivation")
     .min(50, "Please enter at least 50 characters.")
     .max(MOTIVATION_MAX_CHARS, "You cannot enter more than 250 characters."),
@@ -159,7 +147,7 @@ export const documentsSchema = z.object({
   cv: fileReferenceSchema,
   certificate: fileReferenceSchema,
   transcript: fileReferenceSchema,
-  otherDocument: z.array(fileReferenceSchema).optional(),
+  otherDocument: z.array(fileReferenceSchema).max(8).default([]),
 });
 
 export const applicationPayloadSchema = z.object({

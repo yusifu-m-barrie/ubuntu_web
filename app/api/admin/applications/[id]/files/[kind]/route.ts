@@ -20,7 +20,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Unknown document type." }, { status: 400 });
     }
     const application = await getApplication(id);
-    const file = documentFromRecord(application, kind);
+    const requestedIndex = Number(new URL(request.url).searchParams.get("index") || "0");
+    const index = Number.isInteger(requestedIndex) && requestedIndex >= 0 ? requestedIndex : 0;
+    const file = documentFromRecord(application, kind, index);
     if (!file) {
       return NextResponse.json({ error: "File not found." }, { status: 404 });
     }

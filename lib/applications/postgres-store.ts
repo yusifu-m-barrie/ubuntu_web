@@ -11,7 +11,7 @@ import {
   submittedHistoryEvent,
   withHistory,
 } from "@/lib/applications/history";
-import { payloadToRecord } from "@/lib/applications/map";
+import { fileFromStorage, filesFromStorage, payloadToRecord, qualificationsFromStorage } from "@/lib/applications/map";
 import { cohortYear, formatReference, toSummary } from "@/lib/applications/reference";
 import type { ApplicationStore } from "@/lib/applications/store";
 import type {
@@ -19,7 +19,6 @@ import type {
   ApplicationListQuery,
   ApplicationRecord,
   ApplicationStatus,
-  FileReference,
 } from "@/types/application";
 import { APPLICATION_STATUSES } from "@/types/application";
 
@@ -164,41 +163,6 @@ function asHistory(value: unknown): ApplicationHistoryEvent[] {
   });
 }
 
-function asFile(value: unknown): FileReference | null {
-  if (!value || typeof value !== "object") return null;
-  const file = value as FileReference & { storageKey?: string };
-  const pathname = file.pathname || file.storageKey;
-  if (!pathname || !file.filename) return null;
-  return {
-    kind: file.kind,
-    filename: file.filename,
-    contentType: file.contentType,
-    size: file.size,
-    storage: file.storage,
-    pathname,
-    uploadedAt: file.uploadedAt,
-  };
-}
-
-function asFiles(value: unknown): FileReference[] {
-  let parsed = value;
-
-  if (typeof parsed === "string") {
-    try {
-      parsed = JSON.parse(parsed) as unknown;
-    } catch {
-      return [];
-    }
-  }
-
-  if (Array.isArray(parsed)) {
-    return parsed.map(asFile).filter((file): file is FileReference => file !== null);
-  }
-
-  const legacyFile = asFile(parsed);
-  return legacyFile ? [legacyFile] : [];
-}
-
 function rowToRecord(row: ApplicationRow): ApplicationRecord {
   const submitted = row.submitted_at || row.created_at;
   const areas = Array.isArray(row.areas_of_interest)
@@ -223,17 +187,17 @@ function rowToRecord(row: ApplicationRow): ApplicationRecord {
     fieldOfStudy: String(row.field_of_study || ""),
     graduationYear: row.graduation_year == null ? "" : String(row.graduation_year),
     gradeOrGPA: String(row.grade_or_gpa || ""),
-    additionalQualifications: String(row.additional_qualifications || ""),
+    additionalQualifications: qualificationsFromStorage(row.additional_qualifications),
     programme: String(row.programme || ""),
     areasOfInterest: areas,
     motivation: String(row.motivation || ""),
     careerGoals: String(row.career_goals || ""),
     relevantExperience: String(row.relevant_experience || ""),
     additionalInformation: String(row.additional_information || ""),
-    cv: asFile(row.cv),
-    certificate: asFile(row.certificate),
-    transcript: asFile(row.transcript),
-    otherDocument: asFiles(row.other_document),
+    cv: fileFromStorage(row.cv),
+    certificate: fileFromStorage(row.certificate),
+    transcript: fileFromStorage(row.transcript),
+    otherDocument: filesFromStorage(row.other_document),
     status: (row.status as ApplicationStatus) || "NEW",
     submittedAt: submitted ? new Date(String(submitted)).toISOString() : new Date().toISOString(),
     updatedAt: row.updated_at ? new Date(String(row.updated_at)).toISOString() : new Date().toISOString(),
@@ -331,7 +295,7 @@ export const postgresStore: ApplicationStore = {
           record.fieldOfStudy,
           Number(record.graduationYear),
           record.gradeOrGPA,
-          record.additionalQualifications,
+          JSON.stringify(record.additionalQualifications),
           record.programme,
           record.areasOfInterest,
           record.motivation,

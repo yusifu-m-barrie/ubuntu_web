@@ -132,6 +132,12 @@ export function adminNotificationEmail(record: ApplicationRecord, reviewUrl: str
     `District: ${record.district}`,
     `Field of study: ${record.fieldOfStudy}`,
     `Institution: ${record.institution}`,
+    ...(record.additionalQualifications.length
+      ? record.additionalQualifications.map(
+          (qualification, index) =>
+            `Additional qualification ${index + 1}: ${[qualification.degree, qualification.fieldOfStudy, qualification.institution].filter(Boolean).join(" · ")}`,
+        )
+      : []),
     `Application reference: ${record.applicationReference}`,
     `Submission date: ${submitted}`,
     "",
@@ -152,6 +158,14 @@ export function adminNotificationEmail(record: ApplicationRecord, reviewUrl: str
         ${detailRow("District", record.district)}
         ${detailRow("Field of study", record.fieldOfStudy)}
         ${detailRow("Institution", record.institution)}
+        ${record.additionalQualifications
+          .map((qualification, index) =>
+            detailRow(
+              `Additional qualification ${index + 1}`,
+              [qualification.degree, qualification.fieldOfStudy, qualification.institution].filter(Boolean).join(" · ") || "—",
+            ),
+          )
+          .join("")}
         ${detailRow("Application reference", record.applicationReference)}
         ${detailRow("Submission date", submitted)}
       </table>

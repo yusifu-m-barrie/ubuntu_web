@@ -66,7 +66,7 @@ export default async function ApplyLanding() {
           <article className="rounded-2xl bg-cream p-6 ring-1 ring-navy/10">
             <FileText className="h-8 w-8 text-orange" aria-hidden />
             <h2 className="mt-4 font-serif text-xl text-navy">{apply.documentsTitle}</h2>
-            <ul className="mt-3 space-y-1 text-sm text-muted">
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted marker:text-orange">
               {apply.documents.map((item) => (
                 <li key={item}>{item}</li>
               ))}

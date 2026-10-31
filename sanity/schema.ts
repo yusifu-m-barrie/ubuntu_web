@@ -180,6 +180,7 @@ export const applyPage = defineType({
   title: "Apply page",
   type: "document",
   fields: [
+    defineField({ name: "heroKicker", title: "Hero kicker (small orange line above the title)", type: "string" }),
     defineField({ name: "heroTitle", title: "Hero title", type: "string" }),
     defineField({ name: "scholarship", title: "Scholarship line", type: "string" }),
     defineField({ name: "headline", title: "Call for applications line", type: "string" }),

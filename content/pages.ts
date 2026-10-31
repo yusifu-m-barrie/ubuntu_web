@@ -226,6 +226,7 @@ export const applyPage: ApplyPage = {
   },
   headline: "Call for Applications for the 5th Cohort Training in Software Engineering",
   scholarship: "FULL 100% SCHOLARSHIP",
+  heroKicker: "Ubuntu Tech Afrika · Graduate/Postgraduate Programme",
   heroTitle: "Start Your Journey With Ubuntu Tech Afrika",
   intro:
     "The programme provides graduates with an opportunity to develop practical skills, gain professional experience, and potentially join the Ubuntu Tech Afrika team.",

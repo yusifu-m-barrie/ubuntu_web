@@ -43,6 +43,7 @@ async function main() {
   await client
     .patch("applyPage")
     .set({
+      heroKicker: applyPage.heroKicker,
       heroTitle: applyPage.heroTitle,
       intro: applyPage.intro,
       whoTitle: applyPage.whoTitle,

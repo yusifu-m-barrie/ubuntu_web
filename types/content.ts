@@ -115,6 +115,7 @@ export type ApplyPage = {
   seo: SeoFields;
   headline: string;
   scholarship: string;
+  heroKicker: string;
   heroTitle: string;
   intro: string;
   whoTitle: string;

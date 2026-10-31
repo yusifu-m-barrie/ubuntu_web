@@ -207,6 +207,7 @@ async function seed() {
     _id: "applyPage",
     _type: "applyPage",
     seo: await seoBlock(applyPage.seo),
+    heroKicker: applyPage.heroKicker,
     heroTitle: applyPage.heroTitle,
     intro: applyPage.intro,
     whoTitle: applyPage.whoTitle,

@@ -24,7 +24,7 @@ export default async function ApplyLanding() {
   return (
     <>
       <PageHero
-        kicker="Ubuntu Tech Afrika · Graduate/Postgraduate Programme"
+        kicker={apply.heroKicker}
         title={apply.heroTitle}
         subtitle={apply.scholarship || undefined}
       />

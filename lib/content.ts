@@ -142,6 +142,7 @@ function mapApply(doc: Doc, fallback: ApplyPage): ApplyPage {
     seo: seo(doc.seo, fallback.seo, doc._updatedAt),
     headline: text(doc.headline, fallback.headline),
     scholarship: text(doc.scholarship, fallback.scholarship),
+    heroKicker: text(doc.heroKicker, fallback.heroKicker),
     heroTitle: text(doc.heroTitle, fallback.heroTitle),
     intro: text(doc.intro, fallback.intro),
     whoTitle: text(doc.whoTitle, fallback.whoTitle),

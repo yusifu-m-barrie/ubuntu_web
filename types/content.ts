@@ -115,8 +115,18 @@ export type ApplyPage = {
   seo: SeoFields;
   headline: string;
   scholarship: string;
+  heroTitle: string;
+  intro: string;
+  whoTitle: string;
+  whoBody: string;
+  expectTitle: string;
+  expectBody: string;
   documentsTitle: string;
   documents: string[];
+  documentsNote: string;
+  processTitle: string;
+  processBody: string;
+  readyTitle: string;
   sendTo: string;
   closingDate: string;
   ctaLabel: string;

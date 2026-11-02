@@ -160,6 +160,7 @@ function mapApply(doc: Doc, fallback: ApplyPage): ApplyPage {
     ctaLabel: text(doc.ctaLabel, fallback.ctaLabel),
     ctaMailto: text(doc.ctaMailto, fallback.ctaMailto),
     heroImage: sanityImageUrl(doc.heroImage, text(doc.heroImageSrc, fallback.heroImage), doc._updatedAt),
+    heroImageAlt: text((doc.heroImage as Doc | undefined)?.alt, fallback.heroImageAlt),
   };
 }
 

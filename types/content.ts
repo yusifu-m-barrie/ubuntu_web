@@ -133,6 +133,7 @@ export type ApplyPage = {
   ctaLabel: string;
   ctaMailto: string;
   heroImage: string;
+  heroImageAlt: string;
 };
 
 export type ContactPage = {

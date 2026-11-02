@@ -4,7 +4,7 @@ import { CtaLink } from "@/components/ui/PageHero";
 import { DRAFT_STORAGE_KEY } from "@/lib/applications/constants";
 import { useEffect, useState } from "react";
 
-export function ApplyStartActions() {
+export function ApplyStartActions({ className = "mt-8" }: { className?: string }) {
   const [label, setLabel] = useState("Start Application");
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export function ApplyStartActions() {
   }, []);
 
   return (
-    <div className="mt-8">
+    <div className={className}>
       <CtaLink href="/apply/form">{label}</CtaLink>
     </div>
   );

@@ -253,6 +253,7 @@ export const applyPage: ApplyPage = {
   ctaMailto:
     "mailto:d.salifu@ubuntuafrika.com?subject=5th%20Cohort%20Software%20Engineering%20Application",
   heroImage: "/images/Ubuntu-scaled.jpg",
+  heroImageAlt: "Ubuntu Tech Afrika graduate and postgraduate programme flyer",
 };
 
 export const contactPage: ContactPage = {

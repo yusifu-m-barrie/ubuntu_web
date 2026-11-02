@@ -16,6 +16,8 @@ type Props = {
 
 type QualificationField = keyof AdditionalQualification;
 
+const OTHER_FIELD_OF_STUDY: (typeof FIELDS_OF_STUDY)[number] = "Other related field";
+
 const qualificationFields: QualificationField[] = [
   "institution",
   "degree",
@@ -39,13 +41,19 @@ function QualificationFields({
   idPrefix,
   errors,
   requiredFields,
+  otherFieldOfStudy,
+  otherFieldError,
   onChange,
+  onOtherFieldOfStudyChange,
 }: {
   value: AdditionalQualification;
   idPrefix: string;
   errors: Record<string, string>;
   requiredFields: QualificationField[];
+  otherFieldOfStudy: string;
+  otherFieldError?: string;
   onChange: (field: QualificationField, next: string) => void;
+  onOtherFieldOfStudyChange: (next: string) => void;
 }) {
   function idFor(field: QualificationField) {
     return idPrefix ? `${idPrefix}-${field}` : field;
@@ -87,7 +95,8 @@ function QualificationFields({
           </Field>
         );
 
-      case "fieldOfStudy":
+      case "fieldOfStudy": {
+        const otherFieldId = `${id}-other`;
         return (
           <Field id={id} label="Field of study" required={required} error={error}>
             <select {...commonProps}>
@@ -98,8 +107,29 @@ function QualificationFields({
                 </option>
               ))}
             </select>
+            {value.fieldOfStudy === OTHER_FIELD_OF_STUDY ? (
+              <div className="mt-3">
+                <Field
+                  id={otherFieldId}
+                  label="Please specify your field of study"
+                  required={required}
+                  error={otherFieldError}
+                >
+                  <input
+                    id={otherFieldId}
+                    value={otherFieldOfStudy}
+                    onChange={(event) => onOtherFieldOfStudyChange(event.target.value)}
+                    placeholder="Enter your field of study"
+                    className={inputClass}
+                    aria-invalid={Boolean(otherFieldError)}
+                    aria-describedby={describedBy(otherFieldId, undefined, otherFieldError)}
+                  />
+                </Field>
+              </div>
+            ) : null}
           </Field>
         );
+      }
 
       case "graduationYear":
         return (
@@ -131,6 +161,7 @@ function QualificationFields({
 export function AcademicStep({ value, onChange, onNext, onBack }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [visibleQualifications, setVisibleQualifications] = useState<Record<number, boolean>>({});
+  const [otherFieldsOfStudy, setOtherFieldsOfStudy] = useState<Record<string, string>>({});
 
   const visibleQualificationCount = value.additionalQualifications.reduce(
     (count, _, index) => count + (visibleQualifications[index] === false ? 0 : 1),
@@ -160,22 +191,26 @@ export function AcademicStep({ value, onChange, onNext, onBack }: Props) {
     setErrors((current) => {
       const updated = { ...current };
       delete updated[field];
+      if (field === "fieldOfStudy") delete updated["fieldOfStudy-other"];
       return updated;
     });
   }
 
   function updateAdditional(index: number, field: QualificationField, next: string) {
-  const qualifications = [...value.additionalQualifications];
-  qualifications[index] = { ...qualifications[index], [field]: next };
+    const qualifications = [...value.additionalQualifications];
+    qualifications[index] = { ...qualifications[index], [field]: next };
 
-  onChange({ ...value, additionalQualifications: qualifications });
+    onChange({ ...value, additionalQualifications: qualifications });
 
-  setErrors((current) => {
-    const updated = { ...current };
-    delete updated[`additionalQualification-${index}-${field}`];
-    return updated;
-  });
-}
+    setErrors((current) => {
+      const updated = { ...current };
+      delete updated[`additionalQualification-${index}-${field}`];
+      if (field === "fieldOfStudy") {
+        delete updated[`additionalQualification-${index}-fieldOfStudy-other`];
+      }
+      return updated;
+    });
+  }
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -196,6 +231,23 @@ export function AcademicStep({ value, onChange, onNext, onBack }: Props) {
         if (id && !next[id]) next[id] = issue.message;
       }
 
+      if (
+        value.fieldOfStudy === OTHER_FIELD_OF_STUDY &&
+        !otherFieldsOfStudy.primary?.trim()
+      ) {
+        next["fieldOfStudy-other"] = "Please specify your field of study.";
+      }
+
+      setErrors(next);
+      focusFirstError(next);
+      return;
+    }
+
+    if (
+      value.fieldOfStudy === OTHER_FIELD_OF_STUDY &&
+      !otherFieldsOfStudy.primary?.trim()
+    ) {
+      const next = { "fieldOfStudy-other": "Please specify your field of study." };
       setErrors(next);
       focusFirstError(next);
       return;
@@ -217,6 +269,16 @@ export function AcademicStep({ value, onChange, onNext, onBack }: Props) {
             errors={errors}
             requiredFields={["institution", "degree", "fieldOfStudy", "graduationYear"]}
             onChange={updatePrimary}
+            otherFieldOfStudy={otherFieldsOfStudy.primary ?? ""}
+            otherFieldError={errors["fieldOfStudy-other"]}
+            onOtherFieldOfStudyChange={(next) => {
+              setOtherFieldsOfStudy((current) => ({ ...current, primary: next }));
+              setErrors((current) => {
+                const updated = { ...current };
+                delete updated["fieldOfStudy-other"];
+                return updated;
+              });
+            }}
           />
         </div>
 
@@ -247,6 +309,19 @@ export function AcademicStep({ value, onChange, onNext, onBack }: Props) {
                     errors={errors}
                     requiredFields={[]}
                     onChange={(field, next) => updateAdditional(index, field, next)}
+                    otherFieldOfStudy={otherFieldsOfStudy[`additional-${index}`] ?? ""}
+                    otherFieldError={errors[`additionalQualification-${index}-fieldOfStudy-other`]}
+                    onOtherFieldOfStudyChange={(next) => {
+                      setOtherFieldsOfStudy((current) => ({
+                        ...current,
+                        [`additional-${index}`]: next,
+                      }));
+                      setErrors((current) => {
+                        const updated = { ...current };
+                        delete updated[`additionalQualification-${index}-fieldOfStudy-other`];
+                        return updated;
+                      });
+                    }}
                   />
                 </div>
               </fieldset>

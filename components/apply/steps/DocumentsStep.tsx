@@ -31,12 +31,14 @@ type UploadEntry = {
   status: "uploading" | "uploaded" | "error";
   progress: number;
   error?: string;
+  uploaded?: FileReference;
 };
 
 function uploadWithProgress(
   kind: DocumentKind,
   file: File,
   onProgress: (percent: number) => void,
+  onRequest: (request: XMLHttpRequest) => void,
 ): Promise<FileReference> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -73,6 +75,7 @@ function uploadWithProgress(
     const body = new FormData();
     body.append("kind", kind);
     body.append("file", file);
+    onRequest(xhr);
     xhr.send(body);
   });
 }
@@ -81,6 +84,8 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
   const [errors, setErrors] = useState<Partial<Record<DocumentKind | "form", string>>>({});
   const [uploads, setUploads] = useState<UploadEntry[]>([]);
   const documentsRef = useRef(value);
+  const uploadRequests = useRef(new Map<string, XMLHttpRequest>());
+  const cancelledUploads = useRef(new Set<string>());
 
   function updateDocuments(update: (current: DraftDocuments) => DraftDocuments) {
     const next = update(documentsRef.current);
@@ -104,10 +109,21 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
       return;
     }
 
+    if (cancelledUploads.current.has(id)) return;
+
     try {
-      const uploaded = await uploadWithProgress(kind, file, (progress) => {
-        updateUpload(id, (entry) => ({ ...entry, progress }));
-      });
+      const uploaded = await uploadWithProgress(
+        kind,
+        file,
+        (progress) => {
+          if (!cancelledUploads.current.has(id)) {
+            updateUpload(id, (entry) => ({ ...entry, progress }));
+          }
+        },
+        (request) => uploadRequests.current.set(id, request),
+      );
+
+      if (cancelledUploads.current.has(id)) return;
 
       updateDocuments((current) => {
         if (kind === "otherDocument") {
@@ -125,15 +141,42 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
         status: "uploaded",
         progress: 100,
         error: undefined,
+        uploaded,
       }));
       setErrors((current) => ({ ...current, [kind]: undefined, form: undefined }));
     } catch (error) {
+      if (cancelledUploads.current.has(id)) return;
+
       updateUpload(id, (entry) => ({
         ...entry,
         status: "error",
         error: error instanceof Error ? error.message : "Upload failed. Please try again.",
       }));
+    } finally {
+      uploadRequests.current.delete(id);
     }
+  }
+
+  function removeFile(kind: DocumentKind, file: FileReference) {
+    updateDocuments((current) => {
+      if (kind === "otherDocument") {
+        return {
+          ...current,
+          otherDocument: (current.otherDocument ?? []).filter((item) => item !== file),
+        };
+      }
+
+      const next = { ...current };
+      delete next[kind];
+      return next;
+    });
+  }
+
+  function removeUpload(entry: UploadEntry) {
+    cancelledUploads.current.add(entry.id);
+    uploadRequests.current.get(entry.id)?.abort();
+    setUploads((current) => current.filter((item) => item.id !== entry.id));
+    if (entry.uploaded) removeFile(entry.kind, entry.uploaded);
   }
 
   function onFilesSelected(kind: DocumentKind, files: FileList | null) {
@@ -143,7 +186,7 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
 
     const selectedFiles = Array.from(files);
     const entries = selectedFiles.map((file) => ({
-      id: kind === "otherDocument" ? crypto.randomUUID() : `single-${kind}`,
+      id: crypto.randomUUID(),
       kind,
       filename: file.name,
       size: file.size,
@@ -153,8 +196,10 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
     }));
 
     setUploads((current) => {
-      const newIds = new Set(entries.map((entry) => entry.id));
-      return [...current.filter((entry) => !newIds.has(entry.id)), ...entries];
+      return [
+        ...current.filter((entry) => kind === "otherDocument" || entry.kind !== kind),
+        ...entries,
+      ];
     });
 
     for (const entry of entries) {
@@ -229,10 +274,20 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
                     <ul className="space-y-3">
                       {entries.map((entry) => (
                         <li key={entry.id} className="text-sm text-navy">
-                          <p>
-                            <span className="font-medium">{entry.filename}</span>
-                            <span className="text-muted"> · {formatBytes(entry.size)}</span>
-                          </p>
+                          <div className="flex items-start justify-between gap-3">
+                            <p>
+                              <span className="font-medium">{entry.filename}</span>
+                              <span className="text-muted"> · {formatBytes(entry.size)}</span>
+                            </p>
+                            <button
+                              type="button"
+                              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-navy hover:bg-navy/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                              aria-label={`Remove ${entry.filename}`}
+                              onClick={() => removeUpload(entry)}
+                            >
+                              ×
+                            </button>
+                          </div>
                           {entry.status === "uploading" ? (
                             <div className="mt-2" aria-live="polite">
                               <p className="text-xs font-medium">Uploading… {entry.progress}%</p>
@@ -271,13 +326,21 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
                       ))}
 
                       {existingFiles
-                        .filter((file) => !entries.some((entry) =>
-                          entry.status === "uploaded" && entry.filename === file.filename,
-                        ))
-                        .map((file, index) => (
-                          <li key={`${file.pathname}-${index}`} className="text-sm text-navy">
-                            <span className="font-medium">{file.filename}</span>
-                            <span className="text-muted"> · {formatBytes(file.size)} · Uploaded</span>
+                        .filter((file) => !entries.some((entry) => entry.uploaded === file))
+                        .map((file) => (
+                          <li key={file.pathname} className="flex items-start justify-between gap-3 text-sm text-navy">
+                            <p>
+                              <span className="font-medium">{file.filename}</span>
+                              <span className="text-muted"> · {formatBytes(file.size)} · Uploaded</span>
+                            </p>
+                            <button
+                              type="button"
+                              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-navy hover:bg-navy/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                              aria-label={`Remove ${file.filename}`}
+                              onClick={() => removeFile(kind, file)}
+                            >
+                              ×
+                            </button>
                           </li>
                         ))}
                     </ul>
@@ -285,16 +348,36 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
                 ) : (
                   <>
                     {entries[0] ? (
-                      <p className="text-sm text-navy">
-                        <span className="font-medium">{entries[0].filename}</span>
-                        <span className="text-muted"> · {formatBytes(entries[0].size)}</span>
-                        {entries[0].status === "uploaded" ? " · Uploaded" : null}
-                      </p>
+                      <div className="flex items-start justify-between gap-3 text-sm text-navy">
+                        <p>
+                          <span className="font-medium">{entries[0].filename}</span>
+                          <span className="text-muted"> · {formatBytes(entries[0].size)}</span>
+                          {entries[0].status === "uploaded" ? " · Uploaded" : null}
+                        </p>
+                        <button
+                          type="button"
+                          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-navy hover:bg-navy/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                          aria-label={`Remove ${entries[0].filename}`}
+                          onClick={() => removeUpload(entries[0])}
+                        >
+                          ×
+                        </button>
+                      </div>
                     ) : existingFiles[0] ? (
-                      <p className="text-sm text-navy">
-                        <span className="font-medium">{existingFiles[0].filename}</span>
-                        <span className="text-muted"> · {formatBytes(existingFiles[0].size)} · Uploaded</span>
-                      </p>
+                      <div className="flex items-start justify-between gap-3 text-sm text-navy">
+                        <p>
+                          <span className="font-medium">{existingFiles[0].filename}</span>
+                          <span className="text-muted"> · {formatBytes(existingFiles[0].size)} · Uploaded</span>
+                        </p>
+                        <button
+                          type="button"
+                          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-navy hover:bg-navy/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                          aria-label={`Remove ${existingFiles[0].filename}`}
+                          onClick={() => removeFile(kind, existingFiles[0])}
+                        >
+                          ×
+                        </button>
+                      </div>
                     ) : (
                       <p className="text-sm text-muted">No file chosen</p>
                     )}

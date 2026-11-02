@@ -41,6 +41,9 @@ function Answer({ label, value }: { label: string; value: string }) {
 
 export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclaration, onSubmit }: Props) {
   const [confirming, setConfirming] = useState(false);
+  const additionalQualifications = draft.academic.additionalQualifications.filter((qualification) =>
+    Object.values(qualification).some((field) => field.trim()),
+  );
 
   useEffect(() => {
     if (error) setConfirming(false);
@@ -95,8 +98,7 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
             <Row label="Field of study" value={draft.academic.fieldOfStudy} />
             <Row label="Graduation year" value={draft.academic.graduationYear} />
             <Row label="Grade / GPA" value={draft.academic.gradeOrGPA} />
-            {/* <Row label="Additional" value={draft.academic.additionalQualifications} /> */}
-            {draft.academic.additionalQualifications.map((qualification, index) => (
+            {additionalQualifications.map((qualification, index) => (
               <React.Fragment key={index}>
                 <Row label={`Additional qualification ${index + 1} — Institution`} value={qualification.institution} />
                 <Row label={`Additional qualification ${index + 1} — Degree`} value={qualification.degree} />
@@ -118,8 +120,12 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
           <div className="grid min-w-0 gap-3">
             <Answer label="Why Ubuntu Tech Afrika" value={draft.questions.motivation} />
             <Answer label="Career goals" value={draft.questions.careerGoals} />
-            <Answer label="Projects / experience" value={draft.questions.relevantExperience} />
-            <Answer label="Additional" value={draft.questions.additionalInformation} />
+            {draft.questions.relevantExperience.trim() ? (
+              <Answer label="Projects / experience" value={draft.questions.relevantExperience} />
+            ) : null}
+            {draft.questions.additionalInformation.trim() ? (
+              <Answer label="Additional" value={draft.questions.additionalInformation} />
+            ) : null}
           </div>
         </section>
 
@@ -136,11 +142,19 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
                 const files = draft.documents.otherDocument ?? [];
 
                 return (
-                  <li key={kind} className="flex min-w-0 justify-between gap-3">
-                    <span className="min-w-0 shrink-0 text-muted">{DOCUMENT_LABELS[kind]}</span>
-                    <span className="min-w-0 overflow-hidden break-words text-right font-medium text-navy [overflow-wrap:anywhere]">
-                      {files.length ? files.map((file) => file.filename).join(", ") : "Not provided"}
-                    </span>
+                  <li key={kind} className="flex min-w-0 flex-col gap-1">
+                    <span className="text-muted">{DOCUMENT_LABELS[kind]}</span>
+                    {files.length ? (
+                      <span className="min-w-0 break-words font-medium text-navy [overflow-wrap:anywhere]">
+                        {files.map((file) => (
+                          <span key={file.pathname} className="block py-0.5">
+                            {file.filename}
+                          </span>
+                        ))}
+                      </span>
+                    ) : (
+                      <span className="font-medium text-navy">Not provided</span>
+                    )}
                   </li>
                 );
               }
@@ -152,7 +166,8 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
                   <span className="min-w-0 shrink-0 text-muted">{DOCUMENT_LABELS[kind]}</span>
                   <span className="min-w-0 overflow-hidden break-words text-right font-medium text-navy [overflow-wrap:anywhere]">
                     {file?.filename || "Missing"}
-                  </span>
+                  </span
+                  >
                 </li>
               );
             })}

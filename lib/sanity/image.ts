@@ -9,6 +9,13 @@ function withVersion(url: string, version?: unknown) {
   return url.includes("?") ? `${url}&v=${stamp}` : `${url}?v=${stamp}`;
 }
 
+export function imageObjectPosition(source: unknown) {
+  if (!source || typeof source !== "object") return undefined;
+  const hotspot = (source as { hotspot?: { x?: number; y?: number } }).hotspot;
+  if (typeof hotspot?.x !== "number" || typeof hotspot?.y !== "number") return undefined;
+  return `${Math.round(hotspot.x * 1000) / 10}% ${Math.round(hotspot.y * 1000) / 10}%`;
+}
+
 export function sanityImageUrl(source: unknown, fallback = "", version?: unknown) {
   if (!source) return fallback;
   if (typeof source === "string") {

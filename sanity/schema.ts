@@ -409,7 +409,12 @@ export const alumni = defineType({
   fields: [
     defineField({ name: "name", type: "string", validation: (r) => r.required() }),
     defineField({ name: "cohort", type: "string" }),
-    defineField({ name: "photo", type: "image" }),
+    defineField({
+      name: "photo",
+      type: "image",
+      options: { hotspot: true },
+      description: "Drag the hotspot onto the face so the postgraduate cards crop the portrait correctly.",
+    }),
     defineField({ name: "photoUrl", title: "Photo path (migration)", type: "string", hidden: true }),
     defineField({ name: "order", type: "number" }),
     defineField({ name: "job", title: "Public role", type: "string" }),

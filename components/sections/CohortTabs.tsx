@@ -76,14 +76,15 @@ export function CohortTabs({
               onClick={() => setSelectedIndex(index)}
               className="hover-glow h-full w-full cursor-pointer overflow-hidden rounded-2xl bg-white text-left shadow-sm ring-1 ring-navy/10 focus-visible:ring-2 focus-visible:ring-orange"
             >
-              <div className="relative aspect-[4/3] overflow-hidden bg-sand">
+              <div className="relative aspect-[4/5] overflow-hidden bg-sand">
                 {person.photo ? (
                   <Image
                     src={person.photo}
                     alt={person.name}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover object-top transition duration-700 group-hover:scale-110"
+                    className="object-cover object-[center_22%] transition duration-700 group-hover:scale-[1.03]"
+                    style={person.photoPosition ? { objectPosition: person.photoPosition } : undefined}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-sm text-muted">No photo</div>

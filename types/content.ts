@@ -191,6 +191,7 @@ export type AlumniRecord = {
   name: string;
   cohort: string;
   photo?: string;
+  photoPosition?: string;
   residence: string;
   birthPlace: string;
   familyPlace: string;

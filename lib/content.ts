@@ -1,8 +1,8 @@
 import { getMigratedContent, type MigratedContent } from "@/content";
 import { sortTeamMembers } from "@/content/team";
-import { applyStaffPositionsToAlumni } from "@/lib/people";
+import { applyStaffPositionsToAlumni, findPerson } from "@/lib/people";
 import { sanityClient, sanityConfigured } from "@/lib/sanity/client";
-import { sanityImageUrl } from "@/lib/sanity/image";
+import { imageObjectPosition, sanityImageUrl } from "@/lib/sanity/image";
 import { allContentQuery } from "@/lib/sanity/queries";
 import { unstable_noStore as noStore } from "next/cache";
 import type {
@@ -315,22 +315,27 @@ function mapTestimonials(docs: Doc[], fallback: Testimonial[]): Testimonial[] {
 
 function mapAlumni(docs: Doc[], fallback: AlumniRecord[]): AlumniRecord[] {
   if (!docs.length) return fallback;
-  return docs.map((doc, index) => ({
-    name: text(doc.name, ""),
-    cohort: text(doc.cohort, fallback[index]?.cohort || ""),
-    photo: sanityImageUrl(doc.photo, text(doc.photoUrl, fallback[index]?.photo || ""), doc._updatedAt),
-    residence: text(doc.residence, fallback[index]?.residence || ""),
-    birthPlace: text(doc.birthPlace, fallback[index]?.birthPlace || ""),
-    familyPlace: text(doc.familyPlace, fallback[index]?.familyPlace || ""),
-    job: text(doc.job, fallback[index]?.job || ""),
-    organization: text(doc.organization, fallback[index]?.organization || ""),
-    socialHelp: text(doc.socialHelp, fallback[index]?.socialHelp || ""),
-    contact: text(doc.contact, fallback[index]?.contact || ""),
-    family: text(doc.family, fallback[index]?.family || ""),
-    age: text(doc.age, fallback[index]?.age || ""),
-    grade: text(doc.grade, fallback[index]?.grade || ""),
-    internalNotes: doc.internalNotes ? String(doc.internalNotes) : fallback[index]?.internalNotes,
-  }));
+  return docs.map((doc, index) => {
+    const name = text(doc.name, "");
+    const match = findPerson(name, fallback) || fallback[index];
+    return {
+      name,
+      cohort: text(doc.cohort, match?.cohort || ""),
+      photo: sanityImageUrl(doc.photo, text(doc.photoUrl, match?.photo || ""), doc._updatedAt),
+      photoPosition: imageObjectPosition(doc.photo) || match?.photoPosition,
+      residence: text(doc.residence, match?.residence || ""),
+      birthPlace: text(doc.birthPlace, match?.birthPlace || ""),
+      familyPlace: text(doc.familyPlace, match?.familyPlace || ""),
+      job: text(doc.job, match?.job || ""),
+      organization: text(doc.organization, match?.organization || ""),
+      socialHelp: text(doc.socialHelp, match?.socialHelp || ""),
+      contact: text(doc.contact, match?.contact || ""),
+      family: text(doc.family, match?.family || ""),
+      age: text(doc.age, match?.age || ""),
+      grade: text(doc.grade, match?.grade || ""),
+      internalNotes: doc.internalNotes ? String(doc.internalNotes) : match?.internalNotes,
+    };
+  });
 }
 
 export const loadContent = cache(async (): Promise<MigratedContent> => {

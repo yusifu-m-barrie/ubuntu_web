@@ -4,6 +4,7 @@ import { describedBy, Field, focusFirstError, inputClass, StepActions } from "@/
 import { DEGREES, FIELDS_OF_STUDY } from "@/lib/applications/constants";
 import { academicSchema } from "@/lib/applications/schema";
 import type { AcademicInformation, AdditionalQualification } from "@/types/application";
+import { Minus } from "lucide-react";
 import { useState } from "react";
 
 type Props = {
@@ -129,6 +130,30 @@ function QualificationFields({
 
 export function AcademicStep({ value, onChange, onNext, onBack }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [visibleQualifications, setVisibleQualifications] = useState<Record<number, boolean>>({});
+
+  const visibleQualificationCount = value.additionalQualifications.reduce(
+    (count, _, index) => count + (visibleQualifications[index] === false ? 0 : 1),
+    0,
+  );
+
+  function addAdditionalQualification() {
+    const hiddenIndex = value.additionalQualifications.findIndex(
+      (_, index) => visibleQualifications[index] === false,
+    );
+
+    if (hiddenIndex !== -1) {
+      setVisibleQualifications((current) => ({ ...current, [hiddenIndex]: true }));
+      return;
+    }
+
+    if (value.additionalQualifications.length >= 2) return;
+
+    onChange({
+      ...value,
+      additionalQualifications: [...value.additionalQualifications, emptyQualification()],
+    });
+  }
 
   function updatePrimary(field: QualificationField, next: string) {
     onChange({ ...value, [field]: next });
@@ -196,44 +221,48 @@ export function AcademicStep({ value, onChange, onNext, onBack }: Props) {
         </div>
 
         <div className="sm:col-span-2">
-  {value.additionalQualifications.map((qualification, index) => (
-    <fieldset
-      key={index}
-      className="mt-4 grid gap-4 rounded-xl border border-navy/10 p-4 sm:grid-cols-2"
-    >
-      <legend className="px-2 text-sm font-semibold text-navy">
-        Additional qualification {index + 1}
-      </legend>
-      <div className="sm:col-span-2">
-        <QualificationFields
-          value={qualification}
-          idPrefix={`additionalQualification-${index}`}
-          errors={errors}
-          requiredFields={[]}
-          onChange={(field, next) => updateAdditional(index, field, next)}
-        />
-      </div>
-    </fieldset>
-  ))}
+          {value.additionalQualifications.map((qualification, index) =>
+            visibleQualifications[index] === false ? null : (
+              <fieldset
+                key={index}
+                className="mt-4 grid gap-4 rounded-xl border border-navy/10 p-4 sm:grid-cols-2"
+              >
+                <legend className="flex w-full items-center justify-between px-2 text-sm font-semibold text-navy">
+                  <span>Additional qualification {index + 1}</span>
+                  <button
+                    type="button"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-md text-navy hover:bg-navy/5 focus-visible:ring-2 focus-visible:ring-orange"
+                    aria-label={`Hide additional qualification ${index + 1}`}
+                    onClick={() =>
+                      setVisibleQualifications((current) => ({ ...current, [index]: false }))
+                    }
+                  >
+                    <Minus aria-hidden="true" size={18} />
+                  </button>
+                </legend>
+                <div className="sm:col-span-2">
+                  <QualificationFields
+                    value={qualification}
+                    idPrefix={`additionalQualification-${index}`}
+                    errors={errors}
+                    requiredFields={[]}
+                    onChange={(field, next) => updateAdditional(index, field, next)}
+                  />
+                </div>
+              </fieldset>
+            ),
+          )}
 
-  {value.additionalQualifications.length < 2 ? (
-    <button
-      type="button"
-      className="mt-2 text-sm font-semibold text-orange hover:underline"
-      onClick={() =>
-        onChange({
-          ...value,
-          additionalQualifications: [
-            ...value.additionalQualifications,
-            emptyQualification(),
-          ],
-        })
-      }
-    >
-      + Add Additional Qualification
-    </button>
-  ) : null}
-</div>
+          {visibleQualificationCount < 2 ? (
+            <button
+              type="button"
+              className="mt-2 text-sm font-semibold text-orange hover:underline"
+              onClick={addAdditionalQualification}
+            >
+              + Add Additional Qualification
+            </button>
+          ) : null}
+        </div>
       </fieldset>
 
       <StepActions onBack={onBack} nextLabel="Continue" />

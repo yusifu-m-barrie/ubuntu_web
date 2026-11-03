@@ -8,6 +8,7 @@ import {
 } from "@/lib/applications/constants";
 import { DISTRICTS } from "@/lib/applications/locations";
 import { ALLOWED_CONTENT_TYPES, MAX_FILE_BYTES, isSafeStorageKey } from "@/lib/applications/file-types";
+import { isProfessionalProse, PROFESSIONAL_PROSE_ERROR } from "@/lib/applications/prose";
 import { APPLICATION_STATUSES, DOCUMENT_KINDS } from "@/types/application";
 import { z } from "zod";
 
@@ -138,15 +139,26 @@ export const programmeSchema = z
   }));
 
 
+const professionalProse = (schema: z.ZodString) =>
+  schema.refine(isProfessionalProse, PROFESSIONAL_PROSE_ERROR);
+
 export const questionsSchema = z.object({
-  motivation: required("Motivation")
-    .min(50, "Please enter at least 50 characters.")
-    .max(MOTIVATION_MAX_CHARS, "You cannot enter more than 250 characters."),
-  careerGoals: required("Career goals")
-    .min(50, "Please enter at least 50 characters.")
-    .max(MOTIVATION_MAX_CHARS, "You cannot enter more than 250 characters."),
-  relevantExperience: z.string().trim().max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
-  additionalInformation: z.string().trim().max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
+  motivation: professionalProse(
+    required("Motivation")
+      .min(50, "Please enter at least 50 characters.")
+      .max(MOTIVATION_MAX_CHARS, "You cannot enter more than 250 characters."),
+  ),
+  careerGoals: professionalProse(
+    required("Career goals")
+      .min(50, "Please enter at least 50 characters.")
+      .max(MOTIVATION_MAX_CHARS, "You cannot enter more than 250 characters."),
+  ),
+  relevantExperience: professionalProse(
+    z.string().trim().max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
+  ),
+  additionalInformation: professionalProse(
+    z.string().trim().max(MOTIVATION_MAX_CHARS, `Use ${MOTIVATION_MAX_CHARS} characters or fewer.`),
+  ),
 });
 
 export const fileReferenceSchema = z.object({

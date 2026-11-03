@@ -1,11 +1,13 @@
 "use client";
 
 import { describedBy, Field, focusFirstError, inputClass, StepActions } from "@/components/apply/Fields";
+import { MOTIVATION_MAX_CHARS } from "@/lib/applications/constants";
 import {
-  MOTIVATION_MAX_CHARS,
-  MOTIVATION_MAX_WORDS,
-  MOTIVATION_MIN_WORDS,
-} from "@/lib/applications/constants";
+  isProfessionalProse,
+  PROFESSIONAL_PROSE_ERROR,
+  PROFESSIONAL_PROSE_HINT,
+  sanitizeProfessionalProse,
+} from "@/lib/applications/prose";
 import { questionsSchema } from "@/lib/applications/schema";
 import type { ApplicationQuestions } from "@/types/application";
 import { useState } from "react";
@@ -22,11 +24,11 @@ function countCharacters(value: string) {
   return value.trim().length;
 }
 
-function characterError(value: string) {
+function characterError(value: string, required: boolean) {
   const count = countCharacters(value);
-
-  if (count < 50) return "Please enter at least 50 characters.";
+  if (required && count < 50) return "Please enter at least 50 characters.";
   if (count > MOTIVATION_MAX_CHARS) return "You cannot enter more than 250 characters.";
+  if (!isProfessionalProse(value)) return PROFESSIONAL_PROSE_ERROR;
   return undefined;
 }
 
@@ -42,25 +44,17 @@ export function MotivationStep({ value, onChange, onNext, onBack }: Props) {
   const [errors, setErrors] = useState<Partial<Record<keyof ApplicationQuestions, string>>>({});
 
   function update<K extends keyof ApplicationQuestions>(key: K, next: ApplicationQuestions[K]) {
-  const nextValue =
-    key === "motivation" || key === "careerGoals"
-      ? next
-      : next.slice(0, MOTIVATION_MAX_CHARS);
+    const cleaned = sanitizeProfessionalProse(next).slice(0, MOTIVATION_MAX_CHARS);
+    onChange({ ...value, [key]: cleaned });
 
-  onChange({ ...value, [key]: nextValue });
-
-  setErrors((current) => {
-    const updated = { ...current };
-    delete updated[key];
-
-    if (key === "motivation" || key === "careerGoals") {
-      const error = characterError(nextValue);
+    setErrors((current) => {
+      const updated = { ...current };
+      delete updated[key];
+      const error = characterError(cleaned, key === "motivation" || key === "careerGoals");
       if (error) updated[key] = error;
-    }
-
-    return updated;
-  });
-}
+      return updated;
+    });
+  }
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -94,7 +88,7 @@ export function MotivationStep({ value, onChange, onNext, onBack }: Props) {
           id="motivation"
           label="Why do you want to join Ubuntu Tech Afrika?"
           required
-          hint={characterHint(value.motivation)}
+          hint={`${PROFESSIONAL_PROSE_HINT} ${characterHint(value.motivation)}`}
           error={errors.motivation}
         >
           <textarea
@@ -104,7 +98,7 @@ export function MotivationStep({ value, onChange, onNext, onBack }: Props) {
             value={value.motivation}
             onChange={(event) => update("motivation", event.target.value)}
             aria-invalid={Boolean(errors.motivation)}
-            aria-describedby={describedBy("motivation", characterHint(value.motivation), errors.motivation)}
+            aria-describedby={describedBy("motivation", PROFESSIONAL_PROSE_HINT, errors.motivation)}
             className={inputClass}
           />
         </Field>
@@ -113,7 +107,7 @@ export function MotivationStep({ value, onChange, onNext, onBack }: Props) {
           id="careerGoals"
           label="What are your career goals?"
           required
-          hint={characterHint(value.careerGoals)}
+          hint={`${PROFESSIONAL_PROSE_HINT} ${characterHint(value.careerGoals)}`}
           error={errors.careerGoals}
         >
           <textarea
@@ -123,7 +117,7 @@ export function MotivationStep({ value, onChange, onNext, onBack }: Props) {
             value={value.careerGoals}
             onChange={(event) => update("careerGoals", event.target.value)}
             aria-invalid={Boolean(errors.careerGoals)}
-            aria-describedby={describedBy("careerGoals", characterHint(value.careerGoals), errors.careerGoals)}
+            aria-describedby={describedBy("careerGoals", PROFESSIONAL_PROSE_HINT, errors.careerGoals)}
             className={inputClass}
           />
         </Field>
@@ -131,7 +125,7 @@ export function MotivationStep({ value, onChange, onNext, onBack }: Props) {
         <Field
           id="relevantExperience"
           label="Describe any relevant projects or experience"
-          hint={characterHint(value.relevantExperience)}
+          hint={`${PROFESSIONAL_PROSE_HINT} ${characterHint(value.relevantExperience)}`}
           error={errors.relevantExperience}
         >
           <textarea
@@ -141,18 +135,14 @@ export function MotivationStep({ value, onChange, onNext, onBack }: Props) {
             value={value.relevantExperience}
             onChange={(event) => update("relevantExperience", event.target.value)}
             className={inputClass}
-            aria-describedby={describedBy(
-              "relevantExperience",
-              characterHint(value.relevantExperience),
-              errors.relevantExperience,
-            )}
+            aria-describedby={describedBy("relevantExperience", PROFESSIONAL_PROSE_HINT, errors.relevantExperience)}
           />
         </Field>
 
         <Field
           id="additionalInformation"
           label="Additional information"
-          hint={characterHint(value.additionalInformation)}
+          hint={`${PROFESSIONAL_PROSE_HINT} ${characterHint(value.additionalInformation)}`}
           error={errors.additionalInformation}
         >
           <textarea
@@ -162,11 +152,7 @@ export function MotivationStep({ value, onChange, onNext, onBack }: Props) {
             value={value.additionalInformation}
             onChange={(event) => update("additionalInformation", event.target.value)}
             className={inputClass}
-            aria-describedby={describedBy(
-              "additionalInformation",
-              characterHint(value.additionalInformation),
-              errors.additionalInformation,
-            )}
+            aria-describedby={describedBy("additionalInformation", PROFESSIONAL_PROSE_HINT, errors.additionalInformation)}
           />
         </Field>
       </fieldset>

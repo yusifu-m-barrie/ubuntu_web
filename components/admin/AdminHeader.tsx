@@ -12,7 +12,7 @@ export function AdminHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b-4 border-orange bg-navy text-cream print:hidden">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 lg:px-6">
+        <div className="mx-auto flex max-w-[100rem] items-center justify-between gap-4 px-4 py-3 lg:px-6">
         <Link href="/admin/applications" className="flex min-w-0 items-center gap-3">
           <Image
             src={LOGO}

@@ -7,8 +7,8 @@ import { MotivationStep } from "@/components/apply/steps/MotivationStep";
 import { PersonalStep } from "@/components/apply/steps/PersonalStep";
 import { ReviewStep } from "@/components/apply/steps/ReviewStep";
 import { SuccessPanel } from "@/components/apply/SuccessPanel";
-import { DEFAULT_PROGRAMME, DRAFT_STORAGE_KEY } from "@/lib/applications/constants";
-import { emptyDraft } from "@/lib/applications/draft";
+import { DEFAULT_PROGRAMME, DRAFT_TTL_MS } from "@/lib/applications/constants";
+import { clearStoredDraft, emptyDraft, readStoredDraft, writeStoredDraft } from "@/lib/applications/draft";
 import { applicationPayloadSchema } from "@/lib/applications/schema";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AdditionalQualification, ApplicationDraft, FileReference } from "@/types/application";
@@ -61,40 +61,29 @@ function normalizeOtherDocuments(value: unknown): FileReference[] {
   );
 }
 
-function readDraft(): ApplicationDraft {
-  if (typeof window === "undefined") return emptyDraft();
-  try {
-    const raw = sessionStorage.getItem(DRAFT_STORAGE_KEY);
-    if (!raw) return emptyDraft();
-    const parsed = JSON.parse(raw) as ApplicationDraft;
-    if (!parsed?.draftId) return emptyDraft();
-    const base = emptyDraft();
-    return {
-      ...base,
-      ...parsed,
-      step: Math.min(Math.max(parsed.step || 1, 1), 5),
-      personal: { ...base.personal, ...parsed.personal },
-      // academic: { ...base.academic, ...parsed.academic },
-      academic: {
-        ...base.academic,
-        ...parsed.academic,
-        fieldOfStudyOther:
-          typeof parsed.academic?.fieldOfStudyOther === "string" ? parsed.academic.fieldOfStudyOther : "",
-        additionalQualifications: normalizeAdditionalQualifications(
-          parsed.academic?.additionalQualifications
-        ),
-      },
-      programme: { programme: DEFAULT_PROGRAMME, areasOfInterest: [] },
-      questions: { ...base.questions, ...parsed.questions },
-      documents: {
-  ...base.documents,
-  ...parsed.documents,
-  otherDocument: normalizeOtherDocuments(parsed.documents?.otherDocument),
-},
-    };
-  } catch {
-    return emptyDraft();
-  }
+function hydrateDraft(parsed: ApplicationDraft): ApplicationDraft {
+  const base = emptyDraft();
+  return {
+    ...base,
+    ...parsed,
+    draftId: parsed.draftId || base.draftId,
+    step: Math.min(Math.max(parsed.step || 1, 1), 5),
+    personal: { ...base.personal, ...parsed.personal },
+    academic: {
+      ...base.academic,
+      ...parsed.academic,
+      fieldOfStudyOther:
+        typeof parsed.academic?.fieldOfStudyOther === "string" ? parsed.academic.fieldOfStudyOther : "",
+      additionalQualifications: normalizeAdditionalQualifications(parsed.academic?.additionalQualifications),
+    },
+    programme: { programme: DEFAULT_PROGRAMME, areasOfInterest: [] },
+    questions: { ...base.questions, ...parsed.questions },
+    documents: {
+      ...base.documents,
+      ...parsed.documents,
+      otherDocument: normalizeOtherDocuments(parsed.documents?.otherDocument),
+    },
+  };
 }
 
 export function ApplyWizard() {
@@ -104,12 +93,23 @@ export function ApplyWizard() {
   const submittingRef = useRef(false);
 
   useEffect(() => {
-    setDraft(readDraft());
+    const stored = readStoredDraft();
+    setDraft(stored ? hydrateDraft(stored) : emptyDraft());
   }, []);
 
   useEffect(() => {
     if (!draft) return;
-    sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    writeStoredDraft(draft);
+  }, [draft]);
+
+  useEffect(() => {
+    if (!draft || draft.submittedReference) return;
+    const timer = window.setTimeout(() => {
+      clearStoredDraft();
+      setDraft(emptyDraft());
+      setSubmitError("");
+    }, DRAFT_TTL_MS);
+    return () => window.clearTimeout(timer);
   }, [draft]);
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export function ApplyWizard() {
       }
       const next = { ...draft, submittedReference: data.reference };
       setDraft(next);
-      sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(next));
+      writeStoredDraft(next);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "Unable to submit your application right now.");
     } finally {
@@ -183,7 +183,7 @@ export function ApplyWizard() {
 
   function startNew() {
     const next = emptyDraft();
-    sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+    clearStoredDraft();
     setDraft(next);
     setSubmitError("");
   }

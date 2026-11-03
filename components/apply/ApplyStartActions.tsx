@@ -1,23 +1,17 @@
 "use client";
 
 import { CtaLink } from "@/components/ui/PageHero";
-import { DRAFT_STORAGE_KEY } from "@/lib/applications/constants";
+import { readStoredDraft } from "@/lib/applications/draft";
 import { useEffect, useState } from "react";
 
 export function ApplyStartActions({ className = "mt-8" }: { className?: string }) {
   const [label, setLabel] = useState("Start Application");
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(DRAFT_STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as { submittedReference?: string; personal?: { firstName?: string }; step?: number };
-      if (parsed.submittedReference) return;
-      if (parsed.personal?.firstName || (parsed.step && parsed.step > 1)) {
-        setLabel("Continue application");
-      }
-    } catch {
-      /* ignore stored draft */
+    const stored = readStoredDraft();
+    if (!stored || stored.submittedReference) return;
+    if (stored.personal?.firstName || (stored.step && stored.step > 1)) {
+      setLabel("Continue application");
     }
   }, []);
 

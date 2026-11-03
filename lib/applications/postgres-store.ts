@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { ADMIN_PAGE_SIZE, OPEN_APPLICATION_STATUSES } from "@/lib/applications/constants";
+import { ADMIN_PAGE_SIZE, displayFieldOfStudy, OPEN_APPLICATION_STATUSES } from "@/lib/applications/constants";
 import { emptyCounts } from "@/lib/applications/counts";
 import { queryRows, runQuery } from "@/lib/applications/db";
 import { ApplicationStorageError, DuplicateApplicationError } from "@/lib/applications/errors";
@@ -12,13 +12,15 @@ import {
   withHistory,
 } from "@/lib/applications/history";
 import { fileFromStorage, filesFromStorage, payloadToRecord, qualificationsFromStorage } from "@/lib/applications/map";
-import { cohortYear, formatReference, toSummary } from "@/lib/applications/reference";
+import { cohortYear, formatReference, fullName } from "@/lib/applications/reference";
 import type { ApplicationStore } from "@/lib/applications/store";
 import type {
   ApplicationHistoryEvent,
   ApplicationListQuery,
+  ApplicationListResult,
   ApplicationRecord,
   ApplicationStatus,
+  ApplicationSummary,
 } from "@/types/application";
 import { APPLICATION_STATUSES } from "@/types/application";
 
@@ -30,10 +32,27 @@ const SELECT_COLUMNS = `
   reviewed_at, reviewed_by, admin_notes, cohort_year, history
 `;
 
+const LIST_COLUMNS = `
+  id, reference, first_name, middle_name, last_name, email, phone, district, degree,
+  field_of_study, field_of_study_other, programme, status, submitted_at
+`;
+
 let schemaReady = false;
+
+function isMissingRelation(error: unknown) {
+  const code = error && typeof error === "object" && "code" in error ? String(error.code) : "";
+  return code === "42P01" || code === "42703";
+}
 
 async function ensureSchema() {
   if (schemaReady) return;
+  try {
+    await queryRows("SELECT field_of_study_other, history FROM applications LIMIT 0");
+    schemaReady = true;
+    return;
+  } catch (error) {
+    if (!isMissingRelation(error)) throw error;
+  }
   await runQuery(`
     CREATE TABLE IF NOT EXISTS application_counters (
       year INTEGER PRIMARY KEY,
@@ -165,6 +184,23 @@ function asHistory(value: unknown): ApplicationHistoryEvent[] {
   });
 }
 
+function rowToSummary(row: ApplicationRow): ApplicationSummary {
+  const submitted = row.submitted_at || row.created_at;
+  return {
+    id: String(row.id),
+    applicationReference: String(row.reference),
+    email: String(row.email || ""),
+    phone: String(row.phone || ""),
+    fullName: fullName(String(row.first_name || ""), String(row.last_name || ""), String(row.middle_name || "")),
+    programme: String(row.programme || ""),
+    district: String(row.district || ""),
+    degree: String(row.degree || ""),
+    fieldOfStudy: displayFieldOfStudy(String(row.field_of_study || ""), String(row.field_of_study_other || "")),
+    status: (row.status as ApplicationStatus) || "NEW",
+    submittedAt: submitted ? new Date(String(submitted)).toISOString() : new Date().toISOString(),
+  };
+}
+
 function rowToRecord(row: ApplicationRow): ApplicationRecord {
   const submitted = row.submitted_at || row.created_at;
   const areas = Array.isArray(row.areas_of_interest)
@@ -229,6 +265,84 @@ async function nextReference(year: number) {
 
 function isUniqueViolation(error: unknown) {
   return typeof error === "object" && error !== null && "code" in error && String(error.code) === "23505";
+}
+
+async function listApplicationsFast(filters: ApplicationListQuery = {}): Promise<ApplicationListResult> {
+  const clauses: string[] = [];
+  const params: unknown[] = [];
+  const add = (clause: string, value: unknown) => {
+    params.push(value);
+    clauses.push(clause.replace("?", `$${params.length}`));
+  };
+  if (filters.status) add("status = ?", filters.status);
+  if (filters.programme) add("programme = ?", filters.programme);
+  if (filters.fieldOfStudy) add("field_of_study = ?", filters.fieldOfStudy);
+  if (filters.query) {
+    const like = `%${filters.query.replace(/[%_]/g, "")}%`;
+    const start = params.length + 1;
+    params.push(like, like, like, like, like, like);
+    clauses.push(
+      `(reference ILIKE $${start} OR email ILIKE $${start + 1} OR first_name ILIKE $${start + 2} OR last_name ILIKE $${start + 3} OR institution ILIKE $${start + 4} OR CONCAT(first_name, ' ', last_name) ILIKE $${start + 5})`,
+    );
+  }
+  const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+  const sort = filters.sort === "oldest" ? "oldest" : "newest";
+  const order = sort === "oldest" ? "ASC" : "DESC";
+  const pageSize = Math.min(Math.max(filters.pageSize || ADMIN_PAGE_SIZE, 1), 96);
+  const requestedPage = Math.max(filters.page || 1, 1);
+  const offset = (requestedPage - 1) * pageSize;
+  const rows = await queryRows<{
+    items: ApplicationRow[] | string;
+    filtered_total: number;
+    counts: Record<string, number> | string;
+  }>(
+    `WITH page AS (
+       SELECT ${LIST_COLUMNS}
+       FROM applications
+       ${where}
+       ORDER BY submitted_at ${order} NULLS LAST
+       LIMIT ${pageSize} OFFSET ${offset}
+     )
+     SELECT
+       COALESCE((SELECT json_agg(page) FROM page), '[]'::json) AS items,
+       (SELECT COUNT(*)::int FROM applications ${where}) AS filtered_total,
+       (SELECT COALESCE(json_object_agg(status, n), '{}'::json)
+          FROM (SELECT status, COUNT(*)::int AS n FROM applications GROUP BY status) s) AS counts`,
+    params,
+  );
+  schemaReady = true;
+  const payload = rows[0];
+  const items = Array.isArray(payload?.items)
+    ? payload.items
+    : typeof payload?.items === "string"
+      ? (JSON.parse(payload.items) as ApplicationRow[])
+      : [];
+  const grouped =
+    payload?.counts && typeof payload.counts === "object"
+      ? payload.counts
+      : typeof payload?.counts === "string"
+        ? (JSON.parse(payload.counts) as Record<string, number>)
+        : {};
+  const filteredTotal = Number(payload?.filtered_total || 0);
+  const totalPages = Math.max(1, Math.ceil(filteredTotal / pageSize) || 1);
+  const page = Math.min(requestedPage, totalPages);
+  const counts = emptyCounts();
+  for (const [status, n] of Object.entries(grouped)) {
+    const key = status as ApplicationStatus;
+    const value = Number(n || 0);
+    if (APPLICATION_STATUSES.includes(key)) {
+      counts[key] = value;
+      counts.total += value;
+    }
+  }
+  return {
+    items: items.map(rowToSummary),
+    total: filteredTotal,
+    page,
+    pageSize,
+    sort,
+    counts,
+  };
 }
 
 export const postgresStore: ApplicationStore = {
@@ -340,9 +454,16 @@ export const postgresStore: ApplicationStore = {
   },
 
   async get(id) {
-    await ensureSchema();
-    const rows = await queryRows(`SELECT ${SELECT_COLUMNS} FROM applications WHERE id = $1 LIMIT 1`, [id]);
-    return rows[0] ? withHistory(rowToRecord(rows[0])) : null;
+    try {
+      const rows = await queryRows(`SELECT ${SELECT_COLUMNS} FROM applications WHERE id = $1 LIMIT 1`, [id]);
+      schemaReady = true;
+      return rows[0] ? withHistory(rowToRecord(rows[0])) : null;
+    } catch (error) {
+      if (!isMissingRelation(error)) throw error;
+      await ensureSchema();
+      const rows = await queryRows(`SELECT ${SELECT_COLUMNS} FROM applications WHERE id = $1 LIMIT 1`, [id]);
+      return rows[0] ? withHistory(rowToRecord(rows[0])) : null;
+    }
   },
 
   async getByReference(reference) {
@@ -352,55 +473,13 @@ export const postgresStore: ApplicationStore = {
   },
 
   async list(filters: ApplicationListQuery = {}) {
-    await ensureSchema();
-    const clauses: string[] = [];
-    const params: unknown[] = [];
-    const add = (clause: string, value: unknown) => {
-      params.push(value);
-      clauses.push(clause.replace("?", `$${params.length}`));
-    };
-    if (filters.status) add("status = ?", filters.status);
-    if (filters.programme) add("programme = ?", filters.programme);
-    if (filters.fieldOfStudy) add("field_of_study = ?", filters.fieldOfStudy);
-    if (filters.query) {
-      const like = `%${filters.query.replace(/[%_]/g, "")}%`;
-      const start = params.length + 1;
-      params.push(like, like, like, like, like, like);
-      clauses.push(
-        `(reference ILIKE $${start} OR email ILIKE $${start + 1} OR first_name ILIKE $${start + 2} OR last_name ILIKE $${start + 3} OR institution ILIKE $${start + 4} OR CONCAT(first_name, ' ', last_name) ILIKE $${start + 5})`,
-      );
+    try {
+      return await listApplicationsFast(filters);
+    } catch (error) {
+      if (!isMissingRelation(error)) throw error;
+      await ensureSchema();
+      return listApplicationsFast(filters);
     }
-    const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
-    const sort = filters.sort === "oldest" ? "oldest" : "newest";
-    const order = sort === "oldest" ? "ASC" : "DESC";
-    const pageSize = Math.min(Math.max(filters.pageSize || ADMIN_PAGE_SIZE, 1), 50);
-    const countRows = await queryRows(`SELECT COUNT(*)::int AS n FROM applications ${where}`, params);
-    const filteredTotal = Number(countRows[0]?.n || 0);
-    const totalPages = Math.max(1, Math.ceil(filteredTotal / pageSize) || 1);
-    const page = Math.min(Math.max(filters.page || 1, 1), totalPages);
-    const offset = (page - 1) * pageSize;
-    const rows = await queryRows(
-      `SELECT ${SELECT_COLUMNS} FROM applications ${where} ORDER BY submitted_at ${order} NULLS LAST LIMIT ${pageSize} OFFSET ${offset}`,
-      params,
-    );
-    const grouped = await queryRows(`SELECT status, COUNT(*)::int AS n FROM applications GROUP BY status`);
-    const counts = emptyCounts();
-    for (const row of grouped) {
-      const status = String(row.status) as ApplicationStatus;
-      const n = Number(row.n || 0);
-      if (APPLICATION_STATUSES.includes(status)) {
-        counts[status] = n;
-        counts.total += n;
-      }
-    }
-    return {
-      items: rows.map((row) => toSummary(rowToRecord(row))),
-      total: filteredTotal,
-      page,
-      pageSize,
-      sort,
-      counts,
-    };
   },
 
 

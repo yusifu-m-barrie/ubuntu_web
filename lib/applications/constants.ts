@@ -92,9 +92,10 @@ export const DOCUMENT_HINTS: Record<DocumentKind, string> = {
 
 export { MAX_FILE_BYTES, MAX_FILE_LABEL, ACCEPTED_UPLOAD_ATTR } from "@/lib/applications/file-types";
 export const DRAFT_STORAGE_KEY = "uta-application-draft-v5";
+export const DRAFT_TTL_MS = 60 * 60 * 1000;
 export const ADMIN_COOKIE = "uta_admin";
 export const REFERENCE_PREFIX = "UTA";
-export const ADMIN_PAGE_SIZE = 20;
+export const ADMIN_PAGE_SIZE = 48;
 
 export const MOTIVATION_MIN_WORDS = 50;
 export const MOTIVATION_MAX_WORDS = 250;

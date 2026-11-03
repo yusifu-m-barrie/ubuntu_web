@@ -109,7 +109,7 @@ export const fileStore: ApplicationStore = {
       const delta = new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime();
       return sort === "oldest" ? delta : -delta;
     });
-    const pageSize = Math.min(Math.max(filters.pageSize || ADMIN_PAGE_SIZE, 1), 50);
+    const pageSize = Math.min(Math.max(filters.pageSize || ADMIN_PAGE_SIZE, 1), 96);
     const total = filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
     const page = Math.min(Math.max(filters.page || 1, 1), totalPages);

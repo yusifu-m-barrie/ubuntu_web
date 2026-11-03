@@ -12,7 +12,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         }}
       />
       <AdminHeader />
-      <div className="relative mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">{children}</div>
+      <div className="relative mx-auto max-w-[100rem] px-4 py-8 lg:px-6 lg:py-10">{children}</div>
     </div>
   );
 }

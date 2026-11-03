@@ -26,9 +26,9 @@ function pool() {
     globalThis.__utaPgPool = new Pool({
       connectionString: url,
       ssl: sslFor(url),
-      max: process.env.VERCEL ? 1 : 5,
+      max: process.env.VERCEL ? 2 : 8,
       idleTimeoutMillis: 10_000,
-      connectionTimeoutMillis: 15_000,
+      connectionTimeoutMillis: 8_000,
     });
   }
   return globalThis.__utaPgPool;

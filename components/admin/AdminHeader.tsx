@@ -36,7 +36,12 @@ export function AdminHeader() {
           >
             Applications
           </Link>
-          <Link href="/" className="hidden rounded-full px-3 py-2 text-sand hover:text-orange sm:inline">
+          <Link
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden rounded-full px-3 py-2 text-sand hover:text-orange sm:inline"
+          >
             Website
           </Link>
           <form action="/api/admin/logout" method="POST">

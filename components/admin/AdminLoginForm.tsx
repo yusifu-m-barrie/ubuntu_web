@@ -35,8 +35,8 @@ export function AdminLoginForm({ nextPath, error }: { nextPath: string; error?: 
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-8 space-y-4 rounded-2xl bg-white p-6 ring-1 ring-navy/10">
-      <label className="block text-sm font-medium text-navy">
+    <form onSubmit={onSubmit} className="mt-8 space-y-4 rounded-3xl bg-cream p-6 text-navy shadow-2xl ring-1 ring-orange/30">
+      <label className="block text-sm font-medium">
         Password
         <input
           required
@@ -44,7 +44,7 @@ export function AdminLoginForm({ nextPath, error }: { nextPath: string; error?: 
           name="password"
           maxLength={256}
           autoComplete="current-password"
-          className="mt-1 w-full rounded-lg border border-navy/15 bg-cream px-3 py-2.5"
+          className="mt-1 w-full rounded-xl border border-navy/15 bg-white px-3 py-2.5"
         />
       </label>
       <button

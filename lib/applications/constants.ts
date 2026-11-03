@@ -28,14 +28,22 @@ export const DEGREES = [
   "Equivalent IT qualification",
 ] as const;
 
+export const OTHER_FIELD_OF_STUDY = "Other related field" as const;
+
 export const FIELDS_OF_STUDY = [
   "Computer Science",
   "Information Technology",
   "ICT",
   "Software Engineering",
   "Computer Engineering",
-  "Other related field",
+  OTHER_FIELD_OF_STUDY,
 ] as const;
+
+export function displayFieldOfStudy(fieldOfStudy: string, other = "") {
+  const specified = other.trim();
+  if (fieldOfStudy === OTHER_FIELD_OF_STUDY) return specified || fieldOfStudy;
+  return fieldOfStudy;
+}
 
 export const PROGRAMMES = [DEFAULT_PROGRAMME] as const;
 

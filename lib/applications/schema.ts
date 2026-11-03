@@ -4,6 +4,7 @@ import {
   FIELDS_OF_STUDY,
   GENDERS,
   MOTIVATION_MAX_CHARS,
+  OTHER_FIELD_OF_STUDY,
 } from "@/lib/applications/constants";
 import { DISTRICTS } from "@/lib/applications/locations";
 import { ALLOWED_CONTENT_TYPES, MAX_FILE_BYTES, isSafeStorageKey } from "@/lib/applications/file-types";
@@ -69,38 +70,62 @@ const optionalGraduationYearSchema = z.string().trim().refine(
   "Enter a valid graduation year.",
 );
 
-const optionalQualificationSchema = z.object({
-  institution: z.string().trim().max(160),
-  degree: z.string().trim().refine(
-    (value) => value === "" || DEGREES.some((option) => option === value),
-    "Select your degree.",
-  ),
-  fieldOfStudy: z.string().trim().refine(
-    (value) => value === "" || FIELDS_OF_STUDY.some((option) => option === value),
-    "Select your field of study.",
-  ),
-  graduationYear: optionalGraduationYearSchema,
-  gradeOrGPA: z.string().trim().max(80),
-});
+function requireSpecifiedFieldOfStudy(
+  data: { fieldOfStudy: string; fieldOfStudyOther: string },
+  ctx: z.RefinementCtx,
+  path: Array<string | number> = ["fieldOfStudyOther"],
+) {
+  if (data.fieldOfStudy === OTHER_FIELD_OF_STUDY && !data.fieldOfStudyOther.trim()) {
+    ctx.addIssue({
+      code: "custom",
+      path,
+      message: "Please specify your field of study.",
+    });
+  }
+}
 
-export const academicSchema = z.object({
-  institution: required("Institution").max(160),
-  degree: oneOf(DEGREES, "Select your degree."),
-  fieldOfStudy: oneOf(FIELDS_OF_STUDY, "Select your field of study."),
-  graduationYear: graduationYearSchema,
-  gradeOrGPA: z.string().trim().max(80),
-  additionalQualifications: z
-    .array(optionalQualificationSchema)
-    .max(2)
-    .default([])
-    .transform((items) =>
-      items.filter((item) =>
-        [item.institution, item.degree, item.fieldOfStudy, item.graduationYear, item.gradeOrGPA].some((value) =>
-          value.trim(),
+const optionalQualificationSchema = z
+  .object({
+    institution: z.string().trim().max(160),
+    degree: z.string().trim().refine(
+      (value) => value === "" || DEGREES.some((option) => option === value),
+      "Select your degree.",
+    ),
+    fieldOfStudy: z.string().trim().refine(
+      (value) => value === "" || FIELDS_OF_STUDY.some((option) => option === value),
+      "Select your field of study.",
+    ),
+    fieldOfStudyOther: z.string().trim().max(160).default(""),
+    graduationYear: optionalGraduationYearSchema,
+    gradeOrGPA: z.string().trim().max(80),
+  })
+  .superRefine((data, ctx) => {
+    if ([data.institution, data.degree, data.fieldOfStudy, data.graduationYear, data.gradeOrGPA, data.fieldOfStudyOther].some((value) => value.trim())) {
+      requireSpecifiedFieldOfStudy(data, ctx);
+    }
+  });
+
+export const academicSchema = z
+  .object({
+    institution: required("Institution").max(160),
+    degree: oneOf(DEGREES, "Select your degree."),
+    fieldOfStudy: oneOf(FIELDS_OF_STUDY, "Select your field of study."),
+    fieldOfStudyOther: z.string().trim().max(160).default(""),
+    graduationYear: graduationYearSchema,
+    gradeOrGPA: z.string().trim().max(80),
+    additionalQualifications: z
+      .array(optionalQualificationSchema)
+      .max(2)
+      .default([])
+      .transform((items) =>
+        items.filter((item) =>
+          [item.institution, item.degree, item.fieldOfStudy, item.fieldOfStudyOther, item.graduationYear, item.gradeOrGPA].some(
+            (value) => value.trim(),
+          ),
         ),
       ),
-    ),
-});
+  })
+  .superRefine((data, ctx) => requireSpecifiedFieldOfStudy(data, ctx));
 
 export const programmeSchema = z
   .object({

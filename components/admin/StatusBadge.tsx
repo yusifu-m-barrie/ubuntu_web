@@ -2,12 +2,12 @@ import { STATUS_LABELS } from "@/lib/applications/constants";
 import type { ApplicationStatus } from "@/types/application";
 
 const tones: Record<ApplicationStatus, string> = {
-  NEW: "bg-sand text-navy",
+  NEW: "bg-orange/15 text-orange-dark",
   UNDER_REVIEW: "bg-navy/10 text-navy",
-  SHORTLISTED: "bg-orange/15 text-orange-dark",
+  SHORTLISTED: "bg-orange text-white",
   INTERVIEW: "bg-navy text-cream",
-  ACCEPTED: "bg-orange text-white",
-  REJECTED: "bg-red-50 text-red-700",
+  ACCEPTED: "bg-navy text-orange ring-1 ring-orange",
+  REJECTED: "bg-sand text-red-800",
 };
 
 export function StatusBadge({ status }: { status: ApplicationStatus }) {

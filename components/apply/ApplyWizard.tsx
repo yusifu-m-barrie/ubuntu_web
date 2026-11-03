@@ -21,6 +21,7 @@ function normalizeAdditionalQualification(value: unknown): AdditionalQualificati
       institution: typeof item.institution === "string" ? item.institution : "",
       degree: typeof item.degree === "string" ? item.degree : "",
       fieldOfStudy: typeof item.fieldOfStudy === "string" ? item.fieldOfStudy : "",
+      fieldOfStudyOther: typeof item.fieldOfStudyOther === "string" ? item.fieldOfStudyOther : "",
       graduationYear: typeof item.graduationYear === "string" ? item.graduationYear : "",
       gradeOrGPA: typeof item.gradeOrGPA === "string" ? item.gradeOrGPA : "",
     };
@@ -33,20 +34,8 @@ function normalizeAdditionalQualifications(value: unknown): AdditionalQualificat
   const entries = Array.isArray(value) ? value : value ? [value] : [];
 
   return entries.slice(0, 2).flatMap((entry) => {
-    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
-      return [];
-    }
-
-    const item = entry as Record<string, unknown>;
-    return [
-      {
-        institution: typeof item.institution === "string" ? item.institution : "",
-        degree: typeof item.degree === "string" ? item.degree : "",
-        fieldOfStudy: typeof item.fieldOfStudy === "string" ? item.fieldOfStudy : "",
-        graduationYear: typeof item.graduationYear === "string" ? item.graduationYear : "",
-        gradeOrGPA: typeof item.gradeOrGPA === "string" ? item.gradeOrGPA : "",
-      },
-    ];
+    const qualification = normalizeAdditionalQualification(entry);
+    return qualification ? [qualification] : [];
   });
 }
 
@@ -89,6 +78,8 @@ function readDraft(): ApplicationDraft {
       academic: {
         ...base.academic,
         ...parsed.academic,
+        fieldOfStudyOther:
+          typeof parsed.academic?.fieldOfStudyOther === "string" ? parsed.academic.fieldOfStudyOther : "",
         additionalQualifications: normalizeAdditionalQualifications(
           parsed.academic?.additionalQualifications
         ),

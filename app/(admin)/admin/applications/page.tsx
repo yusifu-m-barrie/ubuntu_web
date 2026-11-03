@@ -1,9 +1,10 @@
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { requireAdminPage } from "@/lib/applications/admin-guard";
 import { formatAdminDate } from "@/lib/applications/admin-format";
-import { APPLICATION_STATUSES, STATUS_LABELS } from "@/lib/applications/constants";
+import { APPLICATION_STATUSES, FIELDS_OF_STUDY, STATUS_LABELS } from "@/lib/applications/constants";
 import { listApplications } from "@/lib/applications/service";
 import type { ApplicationCounts, ApplicationStatus } from "@/types/application";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
@@ -15,6 +16,7 @@ type Search = {
   q?: string;
   status?: string;
   programme?: string;
+  fieldOfStudy?: string;
   sort?: string;
   page?: string;
 };
@@ -25,6 +27,7 @@ function hrefFor(params: Search, overrides: Partial<Search> = {}) {
   if (next.q) search.set("q", next.q);
   if (next.status) search.set("status", next.status);
   if (next.programme) search.set("programme", next.programme);
+  if (next.fieldOfStudy) search.set("fieldOfStudy", next.fieldOfStudy);
   if (next.sort && next.sort !== "newest") search.set("sort", next.sort);
   if (next.page && next.page !== "1") search.set("page", next.page);
   const query = search.toString();
@@ -32,12 +35,12 @@ function hrefFor(params: Search, overrides: Partial<Search> = {}) {
 }
 
 const STATS: { key: keyof ApplicationCounts; label: string; status?: ApplicationStatus; className: string }[] = [
-  { key: "total", label: "Total applications", className: "bg-navy text-cream" },
-  { key: "NEW", label: "New", status: "NEW", className: "bg-white text-navy" },
-  { key: "UNDER_REVIEW", label: "Under review", status: "UNDER_REVIEW", className: "bg-white text-navy" },
-  { key: "SHORTLISTED", label: "Shortlisted", status: "SHORTLISTED", className: "bg-white text-navy" },
-  { key: "INTERVIEW", label: "Interview", status: "INTERVIEW", className: "bg-white text-navy" },
-  { key: "ACCEPTED", label: "Accepted", status: "ACCEPTED", className: "bg-white text-navy" },
+  { key: "total", label: "Total", className: "bg-navy text-cream" },
+  { key: "NEW", label: "New", status: "NEW", className: "bg-orange text-white" },
+  { key: "UNDER_REVIEW", label: "Under review", status: "UNDER_REVIEW", className: "bg-navy-soft text-cream" },
+  { key: "SHORTLISTED", label: "Shortlisted", status: "SHORTLISTED", className: "bg-sand text-navy" },
+  { key: "INTERVIEW", label: "Interview", status: "INTERVIEW", className: "bg-navy text-orange" },
+  { key: "ACCEPTED", label: "Accepted", status: "ACCEPTED", className: "bg-white text-navy ring-2 ring-orange" },
   { key: "REJECTED", label: "Rejected", status: "REJECTED", className: "bg-white text-navy" },
 ];
 
@@ -64,13 +67,17 @@ export default async function ApplicationsIndex({
   const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
+  const filtered = Boolean(params.q || params.status || params.fieldOfStudy || params.programme);
 
   return (
     <div>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="font-serif text-3xl text-navy">Applications</h1>
-          <p className="mt-2 text-sm text-muted">Review graduate and postgraduate programme applications.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange">Review queue</p>
+          <h1 className="mt-1 font-serif text-3xl text-navy">Applications</h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted">
+            Open a file to read the application, download documents, leave notes, and move it through review.
+          </p>
         </div>
       </div>
 
@@ -82,11 +89,19 @@ export default async function ApplicationsIndex({
               <Link
                 key={stat.key}
                 href={hrefFor(params, { status: stat.status || "", page: "1" })}
-                className={`rounded-2xl p-4 ring-1 transition ${stat.className} ${
-                  active ? "ring-orange shadow-sm" : "ring-navy/10 hover:ring-orange/50"
+                className={`rounded-2xl p-4 ring-1 transition hover:-translate-y-0.5 ${stat.className} ${
+                  active ? "ring-orange shadow-[0_10px_24px_rgba(238,122,18,0.28)]" : "ring-navy/10"
                 }`}
               >
-                <p className={`text-xs font-semibold uppercase tracking-wide ${stat.key === "total" ? "text-orange" : "text-muted"}`}>
+                <p
+                  className={`text-xs font-semibold uppercase tracking-wide ${
+                    stat.key === "NEW"
+                      ? "text-white/90"
+                      : stat.key === "total" || stat.key === "UNDER_REVIEW" || stat.key === "INTERVIEW"
+                        ? "text-orange"
+                        : "text-muted"
+                  }`}
+                >
                   {stat.label}
                 </p>
                 <p className="mt-2 font-serif text-3xl">{counts[stat.key]}</p>
@@ -96,7 +111,11 @@ export default async function ApplicationsIndex({
         </section>
       ) : null}
 
-      <form className="mt-8 grid gap-3 rounded-2xl bg-white p-4 ring-1 ring-navy/10 lg:grid-cols-[1.4fr_11rem_10rem_auto]" method="get" aria-label="Filter applications">
+      <form
+        className="mt-8 grid gap-3 rounded-2xl bg-white p-4 ring-1 ring-navy/10 lg:grid-cols-[1.2fr_10rem_12rem_9rem_auto_auto]"
+        method="get"
+        aria-label="Filter applications"
+      >
         <label className="text-sm text-navy">
           Search
           <input
@@ -104,12 +123,12 @@ export default async function ApplicationsIndex({
             name="q"
             defaultValue={params.q || ""}
             placeholder="Name, email, or reference"
-            className="mt-1 w-full rounded-lg border border-navy/15 bg-cream px-3 py-2"
+            className="mt-1 w-full rounded-xl border border-navy/15 bg-cream px-3 py-2"
           />
         </label>
         <label className="text-sm text-navy">
           Status
-          <select name="status" defaultValue={params.status || ""} className="mt-1 w-full rounded-lg border border-navy/15 bg-cream px-3 py-2">
+          <select name="status" defaultValue={params.status || ""} className="mt-1 w-full rounded-xl border border-navy/15 bg-cream px-3 py-2">
             <option value="">All</option>
             {APPLICATION_STATUSES.map((status) => (
               <option key={status} value={status}>
@@ -119,15 +138,37 @@ export default async function ApplicationsIndex({
           </select>
         </label>
         <label className="text-sm text-navy">
+          Field of study
+          <select
+            name="fieldOfStudy"
+            defaultValue={params.fieldOfStudy || ""}
+            className="mt-1 w-full rounded-xl border border-navy/15 bg-cream px-3 py-2"
+          >
+            <option value="">All fields</option>
+            {FIELDS_OF_STUDY.map((field) => (
+              <option key={field} value={field}>
+                {field}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-sm text-navy">
           Sort
-          <select name="sort" defaultValue={params.sort || "newest"} className="mt-1 w-full rounded-lg border border-navy/15 bg-cream px-3 py-2">
+          <select name="sort" defaultValue={params.sort || "newest"} className="mt-1 w-full rounded-xl border border-navy/15 bg-cream px-3 py-2">
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
           </select>
         </label>
-        <button type="submit" className="self-end rounded-full bg-navy px-5 py-2 text-sm font-semibold text-white">
+        <button type="submit" className="self-end rounded-full bg-orange px-5 py-2 text-sm font-semibold text-white hover:bg-orange-dark">
           Apply
         </button>
+        {filtered ? (
+          <Link href="/admin/applications" className="self-end rounded-full border-2 border-navy px-5 py-2 text-center text-sm font-semibold text-navy hover:bg-navy hover:text-white">
+            Clear
+          </Link>
+        ) : (
+          <span className="hidden lg:block" />
+        )}
       </form>
 
       {error ? (
@@ -140,74 +181,45 @@ export default async function ApplicationsIndex({
         <div className="mt-8 rounded-2xl bg-white p-10 text-center ring-1 ring-navy/10">
           <p className="font-serif text-2xl text-navy">No applications found</p>
           <p className="mt-2 text-sm text-muted">
-            {params.q || params.status || params.programme
-              ? "Try a different search or filter."
-              : "New submissions will appear here."}
+            {filtered ? "Try a different search or filter." : "New submissions will appear here."}
           </p>
         </div>
       ) : null}
 
       {applications.length ? (
         <>
-          <ul className="mt-8 space-y-4 xl:hidden">
+          <ul className="mt-8 grid gap-4">
             {applications.map((item) => (
-              <li key={item.id} className="rounded-2xl bg-white p-4 ring-1 ring-navy/10">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-navy">{item.fullName}</p>
-                    <p className="text-sm text-muted">{item.applicationReference}</p>
+              <li key={item.id}>
+                <Link
+                  href={`/admin/applications/${item.id}`}
+                  className="group flex overflow-hidden rounded-2xl bg-white ring-1 ring-navy/10 transition hover:-translate-y-0.5 hover:ring-orange"
+                >
+                  <span className="w-1.5 shrink-0 bg-orange" aria-hidden />
+                  <div className="flex min-w-0 flex-1 flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-navy">{item.fullName}</p>
+                        <StatusBadge status={item.status as ApplicationStatus} />
+                      </div>
+                      <p className="mt-1 text-sm font-medium text-orange">{item.applicationReference}</p>
+                      <p className="mt-1 truncate text-sm text-navy">{item.email}</p>
+                      <p className="text-sm text-muted">
+                        {item.district || "—"} · {item.degree || "—"} · {item.fieldOfStudy || "—"}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center justify-between gap-4 sm:flex-col sm:items-end">
+                      <span className="text-xs text-muted">{formatAdminDate(item.submittedAt)}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-navy px-4 py-1.5 text-sm font-semibold text-white group-hover:bg-orange">
+                        Review
+                        <ChevronRight className="h-4 w-4" aria-hidden />
+                      </span>
+                    </div>
                   </div>
-                  <StatusBadge status={item.status as ApplicationStatus} />
-                </div>
-                <p className="mt-2 text-sm">{item.email}</p>
-                <p className="text-sm text-muted">
-                  {item.district || "—"} · {item.degree || "—"}
-                </p>
-                <div className="mt-3 flex items-center justify-between gap-3">
-                  <span className="text-xs text-muted">{formatAdminDate(item.submittedAt)}</span>
-                  <Link href={`/admin/applications/${item.id}`} className="text-sm font-semibold text-orange">
-                    View
-                  </Link>
-                </div>
+                </Link>
               </li>
             ))}
           </ul>
-          <div className="mt-8 hidden overflow-x-auto rounded-2xl bg-white ring-1 ring-navy/10 xl:block">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-sand text-navy">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Applicant name</th>
-                  <th className="px-4 py-3 font-semibold">Email</th>
-                  <th className="px-4 py-3 font-semibold">District</th>
-                  <th className="px-4 py-3 font-semibold">Degree</th>
-                  <th className="px-4 py-3 font-semibold">Application reference</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">Submitted date</th>
-                  <th className="px-4 py-3 font-semibold">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {applications.map((item) => (
-                  <tr key={item.id} className="border-t border-navy/10">
-                    <td className="px-4 py-3 font-medium text-navy">{item.fullName}</td>
-                    <td className="px-4 py-3">{item.email}</td>
-                    <td className="px-4 py-3">{item.district || "—"}</td>
-                    <td className="px-4 py-3">{item.degree || "—"}</td>
-                    <td className="px-4 py-3 font-medium">{item.applicationReference}</td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={item.status} />
-                    </td>
-                    <td className="px-4 py-3 text-muted">{formatAdminDate(item.submittedAt)}</td>
-                    <td className="px-4 py-3">
-                      <Link href={`/admin/applications/${item.id}`} className="font-semibold text-orange hover:underline">
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
 
           <nav className="mt-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center" aria-label="Pagination">
             <p className="text-sm text-muted">
@@ -227,7 +239,7 @@ export default async function ApplicationsIndex({
               {page < totalPages ? (
                 <Link
                   href={hrefFor(params, { page: String(page + 1) })}
-                  className="rounded-full border-2 border-navy px-4 py-2 text-sm font-semibold text-navy hover:bg-navy hover:text-white"
+                  className="rounded-full bg-orange px-4 py-2 text-sm font-semibold text-white hover:bg-orange-dark"
                 >
                   Next
                 </Link>

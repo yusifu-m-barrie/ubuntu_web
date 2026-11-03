@@ -42,6 +42,7 @@ export type AdditionalQualification = {
   institution: string;
   degree: string;
   fieldOfStudy: string;
+  fieldOfStudyOther: string;
   graduationYear: string;
   gradeOrGPA: string;
 };
@@ -50,6 +51,7 @@ export type AcademicInformation = {
   institution: string;
   degree: string;
   fieldOfStudy: string;
+  fieldOfStudyOther: string;
   graduationYear: string;
   gradeOrGPA: string;
   additionalQualifications: AdditionalQualification[];
@@ -123,6 +125,7 @@ export type ApplicationRecord = {
   institution: string;
   degree: string;
   fieldOfStudy: string;
+  fieldOfStudyOther: string;
   graduationYear: string;
   gradeOrGPA: string;
   additionalQualifications: AdditionalQualification[];
@@ -162,6 +165,7 @@ export type ApplicationSummary = {
   id: string;
   applicationReference: string;
   email: string;
+  phone: string;
   fullName: string;
   programme: string;
   district: string;

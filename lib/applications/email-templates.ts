@@ -1,3 +1,4 @@
+import { displayFieldOfStudy } from "@/lib/applications/constants";
 import { fullName } from "@/lib/applications/reference";
 import type { ApplicationRecord } from "@/types/application";
 
@@ -135,7 +136,7 @@ export function adminNotificationEmail(record: ApplicationRecord, reviewUrl: str
     ...(record.additionalQualifications.length
       ? record.additionalQualifications.map(
           (qualification, index) =>
-            `Additional qualification ${index + 1}: ${[qualification.degree, qualification.fieldOfStudy, qualification.institution].filter(Boolean).join(" · ")}`,
+            `Additional qualification ${index + 1}: ${[qualification.degree, displayFieldOfStudy(qualification.fieldOfStudy, qualification.fieldOfStudyOther), qualification.institution].filter(Boolean).join(" · ")}`,
         )
       : []),
     `Application reference: ${record.applicationReference}`,
@@ -162,7 +163,7 @@ export function adminNotificationEmail(record: ApplicationRecord, reviewUrl: str
           .map((qualification, index) =>
             detailRow(
               `Additional qualification ${index + 1}`,
-              [qualification.degree, qualification.fieldOfStudy, qualification.institution].filter(Boolean).join(" · ") || "—",
+              [qualification.degree, displayFieldOfStudy(qualification.fieldOfStudy, qualification.fieldOfStudyOther), qualification.institution].filter(Boolean).join(" · ") || "—",
             ),
           )
           .join("")}

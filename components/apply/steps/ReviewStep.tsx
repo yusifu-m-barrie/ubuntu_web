@@ -1,7 +1,7 @@
 "use client";
 
 import { StepActions } from "@/components/apply/Fields";
-import { DOCUMENT_KINDS, DOCUMENT_LABELS } from "@/lib/applications/constants";
+import { displayFieldOfStudy, DOCUMENT_KINDS, DOCUMENT_LABELS } from "@/lib/applications/constants";
 import { fullName } from "@/lib/applications/reference";
 import type { ApplicationDraft } from "@/types/application";
 import { useEffect, useState } from "react";
@@ -95,14 +95,20 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
           <dl>
             <Row label="Institution" value={draft.academic.institution} />
             <Row label="Degree" value={draft.academic.degree} />
-            <Row label="Field of study" value={draft.academic.fieldOfStudy} />
+            <Row
+              label="Field of study"
+              value={displayFieldOfStudy(draft.academic.fieldOfStudy, draft.academic.fieldOfStudyOther)}
+            />
             <Row label="Graduation year" value={draft.academic.graduationYear} />
             <Row label="Grade / GPA" value={draft.academic.gradeOrGPA} />
             {additionalQualifications.map((qualification, index) => (
               <React.Fragment key={index}>
                 <Row label={`Additional qualification ${index + 1} — Institution`} value={qualification.institution} />
                 <Row label={`Additional qualification ${index + 1} — Degree`} value={qualification.degree} />
-                <Row label={`Additional qualification ${index + 1} — Field of study`} value={qualification.fieldOfStudy} />
+                <Row
+                  label={`Additional qualification ${index + 1} — Field of study`}
+                  value={displayFieldOfStudy(qualification.fieldOfStudy, qualification.fieldOfStudyOther)}
+                />
                 <Row label={`Additional qualification ${index + 1} — Graduation year`} value={qualification.graduationYear} />
                 <Row label={`Additional qualification ${index + 1} — Grade / GPA`} value={qualification.gradeOrGPA} />
               </React.Fragment>
@@ -166,8 +172,7 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
                   <span className="min-w-0 shrink-0 text-muted">{DOCUMENT_LABELS[kind]}</span>
                   <span className="min-w-0 overflow-hidden break-words text-right font-medium text-navy [overflow-wrap:anywhere]">
                     {file?.filename || "Missing"}
-                  </span
-                  >
+                  </span>
                 </li>
               );
             })}

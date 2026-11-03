@@ -185,6 +185,17 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
     setErrors((current) => ({ ...current, [kind]: undefined, form: undefined }));
 
     const selectedFiles = Array.from(files);
+    if (kind === "otherDocument") {
+      const currentCount = documentsRef.current.otherDocument?.length ?? 0;
+      if (currentCount + selectedFiles.length > 8) {
+        setErrors((current) => ({
+          ...current,
+          otherDocument: "You can upload up to 8 supporting documents.",
+        }));
+        return;
+      }
+    }
+
     const entries = selectedFiles.map((file) => ({
       id: crypto.randomUUID(),
       kind,

@@ -1,4 +1,4 @@
-import { REFERENCE_PREFIX } from "@/lib/applications/constants";
+import { displayFieldOfStudy, REFERENCE_PREFIX } from "@/lib/applications/constants";
 import type { ApplicationRecord, ApplicationSummary } from "@/types/application";
 
 export function cohortYear(date = new Date()) {
@@ -22,11 +22,12 @@ export function toSummary(record: ApplicationRecord): ApplicationSummary {
     id: record.id,
     applicationReference: record.applicationReference,
     email: record.email,
+    phone: record.phone,
     fullName: fullName(record.firstName, record.lastName, record.middleName),
     programme: record.programme,
     district: record.district,
     degree: record.degree,
-    fieldOfStudy: record.fieldOfStudy,
+    fieldOfStudy: displayFieldOfStudy(record.fieldOfStudy, record.fieldOfStudyOther),
     status: record.status,
     submittedAt: record.submittedAt,
   };

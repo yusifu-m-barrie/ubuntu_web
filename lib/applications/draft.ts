@@ -20,6 +20,7 @@ export function emptyDraft(): ApplicationDraft {
       institution: "",
       degree: "",
       fieldOfStudy: "",
+      fieldOfStudyOther: "",
       graduationYear: "",
       gradeOrGPA: "",
       additionalQualifications: [],

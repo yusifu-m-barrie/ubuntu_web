@@ -1,4 +1,9 @@
-import { DEFAULT_COUNTRY, DEFAULT_PROGRAMME } from "@/lib/applications/constants";
+import {
+  DEFAULT_COUNTRY,
+  DEFAULT_PROGRAMME,
+  displayFieldOfStudy,
+  OTHER_FIELD_OF_STUDY,
+} from "@/lib/applications/constants";
 import type {
   AdditionalQualification,
   ApplicationPayload,
@@ -6,13 +11,14 @@ import type {
   DocumentKind,
   FileReference,
 } from "@/types/application";
-import { DOCUMENT_KINDS } from "@/types/application";
+import { DOCUMENT_KINDS, REQUIRED_DOCUMENT_KINDS } from "@/types/application";
 
 export function isFilledQualification(qualification: AdditionalQualification) {
   return [
     qualification.institution,
     qualification.degree,
     qualification.fieldOfStudy,
+    qualification.fieldOfStudyOther,
     qualification.graduationYear,
     qualification.gradeOrGPA,
   ].some((value) => value.trim());
@@ -43,6 +49,7 @@ export function qualificationsFromStorage(value: unknown): AdditionalQualificati
           institution: typeof item.institution === "string" ? item.institution : "",
           degree: typeof item.degree === "string" ? item.degree : "",
           fieldOfStudy: typeof item.fieldOfStudy === "string" ? item.fieldOfStudy : "",
+          fieldOfStudyOther: typeof item.fieldOfStudyOther === "string" ? item.fieldOfStudyOther : "",
           graduationYear: typeof item.graduationYear === "string" ? item.graduationYear : "",
           gradeOrGPA: typeof item.gradeOrGPA === "string" ? item.gradeOrGPA : "",
         },
@@ -116,7 +123,9 @@ export function payloadToRecord(
     address: payload.personal.address,
     institution: payload.academic.institution,
     degree: payload.academic.degree,
-    fieldOfStudy: payload.academic.fieldOfStudy,
+    fieldOfStudy: displayFieldOfStudy(payload.academic.fieldOfStudy, payload.academic.fieldOfStudyOther),
+    fieldOfStudyOther:
+      payload.academic.fieldOfStudy === OTHER_FIELD_OF_STUDY ? payload.academic.fieldOfStudyOther.trim() : "",
     graduationYear: payload.academic.graduationYear,
     gradeOrGPA: payload.academic.gradeOrGPA,
     additionalQualifications: filledQualifications(payload.academic.additionalQualifications),
@@ -148,6 +157,7 @@ export function documentFromRecord(
 export function normalizeStoredRecord(record: ApplicationRecord): ApplicationRecord {
   return {
     ...record,
+    fieldOfStudyOther: record.fieldOfStudyOther || "",
     additionalQualifications: qualificationsFromStorage(record.additionalQualifications),
     otherDocument: filesFromStorage(record.otherDocument),
   };
@@ -155,4 +165,9 @@ export function normalizeStoredRecord(record: ApplicationRecord): ApplicationRec
 
 export function isDocumentKind(value: string): value is DocumentKind {
   return DOCUMENT_KINDS.includes(value as DocumentKind);
+}
+
+export function requiredDocumentStats(record: ApplicationRecord) {
+  const present = REQUIRED_DOCUMENT_KINDS.filter((kind) => Boolean(record[kind])).length;
+  return { present, total: REQUIRED_DOCUMENT_KINDS.length, complete: present === REQUIRED_DOCUMENT_KINDS.length };
 }

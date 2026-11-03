@@ -24,7 +24,7 @@ import { APPLICATION_STATUSES } from "@/types/application";
 
 const SELECT_COLUMNS = `
   id, draft_id, reference, first_name, middle_name, last_name, email, phone, date_of_birth, gender,
-  country, district, city, address, institution, degree, field_of_study, graduation_year, grade_or_gpa,
+  country, district, city, address, institution, degree, field_of_study, field_of_study_other, graduation_year, grade_or_gpa,
   additional_qualifications, programme, areas_of_interest, motivation, career_goals, relevant_experience,
   additional_information, cv, certificate, transcript, other_document, status, submitted_at, updated_at,
   reviewed_at, reviewed_by, admin_notes, cohort_year, history
@@ -59,6 +59,7 @@ async function ensureSchema() {
       institution TEXT NOT NULL DEFAULT '',
       degree TEXT NOT NULL DEFAULT '',
       field_of_study TEXT NOT NULL DEFAULT '',
+      field_of_study_other TEXT NOT NULL DEFAULT '',
       graduation_year INTEGER,
       grade_or_gpa TEXT NOT NULL DEFAULT '',
       additional_qualifications TEXT NOT NULL DEFAULT '',
@@ -97,6 +98,7 @@ async function ensureSchema() {
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS institution TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS degree TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS field_of_study TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE applications ADD COLUMN IF NOT EXISTS field_of_study_other TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS graduation_year INTEGER",
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS grade_or_gpa TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS additional_qualifications TEXT NOT NULL DEFAULT ''",
@@ -185,6 +187,7 @@ function rowToRecord(row: ApplicationRow): ApplicationRecord {
     institution: String(row.institution || ""),
     degree: String(row.degree || ""),
     fieldOfStudy: String(row.field_of_study || ""),
+    fieldOfStudyOther: String(row.field_of_study_other || ""),
     graduationYear: row.graduation_year == null ? "" : String(row.graduation_year),
     gradeOrGPA: String(row.grade_or_gpa || ""),
     additionalQualifications: qualificationsFromStorage(row.additional_qualifications),
@@ -264,16 +267,16 @@ export const postgresStore: ApplicationStore = {
       await runQuery(
         `INSERT INTO applications (
           id, draft_id, reference, first_name, middle_name, last_name, email, phone, date_of_birth, gender,
-          country, district, city, address, institution, degree, field_of_study, graduation_year, grade_or_gpa,
+          country, district, city, address, institution, degree, field_of_study, field_of_study_other, graduation_year, grade_or_gpa,
           additional_qualifications, programme, areas_of_interest, motivation, career_goals, relevant_experience,
           additional_information, cv, certificate, transcript, other_document, status, submitted_at, updated_at,
-          admin_notes, cohort_year, history
+          admin_notes, cohort_year, history, payload
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-          $11, $12, $13, $14, $15, $16, $17, $18, $19,
-          $20, $21, $22, $23, $24, $25, $26,
-          $27::jsonb, $28::jsonb, $29::jsonb, $30::jsonb,
-          $31, $32, $33, $34, $35, $36::jsonb
+          $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
+          $21, $22, $23, $24, $25, $26, $27,
+          $28::jsonb, $29::jsonb, $30::jsonb, $31::jsonb,
+          $32, $33, $34, $35, $36, $37::jsonb, $38::jsonb
         )`,
         [
           record.id,
@@ -293,6 +296,7 @@ export const postgresStore: ApplicationStore = {
           record.institution,
           record.degree,
           record.fieldOfStudy,
+          record.fieldOfStudyOther,
           Number(record.graduationYear),
           record.gradeOrGPA,
           JSON.stringify(record.additionalQualifications),
@@ -312,6 +316,7 @@ export const postgresStore: ApplicationStore = {
           record.adminNotes,
           record.cohortYear,
           JSON.stringify(record.history),
+          JSON.stringify(payload),
         ],
       );
     } catch (error) {

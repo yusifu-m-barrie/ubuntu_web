@@ -1,7 +1,8 @@
 "use client";
 
+import { StatusPipeline } from "@/components/admin/StatusPipeline";
 import { updateApplicationStatusAction } from "@/lib/applications/admin-actions";
-import { APPLICATION_STATUSES, STATUS_LABELS } from "@/lib/applications/constants";
+import { STATUS_LABELS } from "@/lib/applications/constants";
 import type { ApplicationStatus } from "@/types/application";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -47,32 +48,19 @@ export function StatusForm({ id, status }: { id: string; status: ApplicationStat
 
   return (
     <div>
-      <label htmlFor="status" className="text-sm font-medium text-navy">
-        Application status
-      </label>
-      <select
-        id="status"
-        value={value}
-        disabled={saving}
-        onChange={(event) => setValue(event.target.value as ApplicationStatus)}
-        className="mt-1 w-full rounded-lg border border-navy/15 bg-cream px-3 py-2 text-sm"
-      >
-        {APPLICATION_STATUSES.map((item) => (
-          <option key={item} value={item}>
-            {STATUS_LABELS[item]}
-          </option>
-        ))}
-      </select>
-      <button
-        type="button"
-        disabled={saving || value === status}
-        onClick={() => setConfirming(true)}
-        className="mt-3 w-full rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-soft disabled:opacity-60"
-      >
-        {saving ? "Updating…" : "Update status"}
-      </button>
+      <p className="text-sm font-medium text-cream">Tap a stage to update</p>
+      <div className="mt-2">
+        <StatusPipeline
+          status={value}
+          disabled={saving}
+          onPick={(next) => {
+            setValue(next);
+            if (next !== status) setConfirming(true);
+          }}
+        />
+      </div>
       {error ? (
-        <p role="alert" className="mt-2 text-sm text-red-700">
+        <p role="alert" className="mt-2 text-sm text-orange">
           {error}
         </p>
       ) : null}
@@ -96,7 +84,10 @@ export function StatusForm({ id, status }: { id: string; status: ApplicationStat
               <button
                 type="button"
                 className="rounded-full border-2 border-navy px-5 py-2.5 text-sm font-semibold text-navy"
-                onClick={() => setConfirming(false)}
+                onClick={() => {
+                  setConfirming(false);
+                  setValue(status);
+                }}
                 disabled={saving}
               >
                 Cancel

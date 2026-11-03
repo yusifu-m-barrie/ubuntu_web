@@ -29,10 +29,20 @@ export function findPerson<T extends { name: string }>(name: string, people: T[]
   return people.find((person) => personKey(person.name) === key);
 }
 
+const STUDENT_JOB = "Student";
+const STUDENT_JOB_COHORTS = new Set(["2023 - 2024", "2025 - 2026"]);
+
+function cohortKey(value: string) {
+  return value.replace(/\s*-\s*/g, " - ").replace(/\s+/g, " ").trim();
+}
+
 export function applyStaffPositionsToAlumni(alumni: AlumniRecord[], team: TeamMember[]): AlumniRecord[] {
   return alumni.map((person) => {
     const member = findPerson(person.name, team);
-    if (!member) return person;
-    return { ...person, job: member.role };
+    if (member) return { ...person, job: member.role };
+    if (STUDENT_JOB_COHORTS.has(cohortKey(person.cohort))) {
+      return { ...person, job: STUDENT_JOB };
+    }
+    return person;
   });
 }

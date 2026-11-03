@@ -127,14 +127,12 @@ async function main() {
   const alumniDocs = await client.fetch<Array<{ _id: string; name: string; job?: string }>>(
     `*[_type == "alumni"]{_id,name,job}`,
   );
-  const staffAlumni = applyStaffPositionsToAlumni(alumni, desired);
-  for (const person of staffAlumni) {
-    const member = findPerson(person.name, desired);
-    if (!member) continue;
+  const publicAlumni = applyStaffPositionsToAlumni(alumni, desired);
+  for (const person of publicAlumni) {
     const doc = findPerson(person.name, alumniDocs);
-    if (!doc || doc.job === member.role) continue;
-    transaction.patch(doc._id, { set: { job: member.role } });
-    console.log(`Patch alumni ${doc.name}: ${doc.job} -> ${member.role}`);
+    if (!doc || doc.job === person.job) continue;
+    transaction.patch(doc._id, { set: { job: person.job } });
+    console.log(`Patch alumni ${doc.name}: ${doc.job} -> ${person.job}`);
   }
 
   const result = await transaction.commit();

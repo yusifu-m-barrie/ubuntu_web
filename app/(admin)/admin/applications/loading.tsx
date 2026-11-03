@@ -9,11 +9,7 @@ export default function ApplicationsLoading() {
           <div key={index} className="h-24 animate-pulse rounded-2xl bg-white ring-1 ring-navy/10" />
         ))}
       </div>
-      <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(16.5rem,1fr))] gap-3">
-        {Array.from({ length: 12 }).map((_, index) => (
-          <div key={index} className="h-40 animate-pulse rounded-2xl bg-white ring-1 ring-navy/10" />
-        ))}
-      </div>
+      <div className="mt-8 h-80 animate-pulse rounded-2xl bg-white ring-1 ring-navy/10" />
     </div>
   );
 }

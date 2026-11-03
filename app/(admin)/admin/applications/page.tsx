@@ -117,11 +117,7 @@ function QueueSkeleton() {
           <div key={index} className="h-24 animate-pulse rounded-2xl bg-white ring-1 ring-navy/10" />
         ))}
       </div>
-      <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(16.5rem,1fr))] gap-3">
-        {Array.from({ length: 12 }).map((_, index) => (
-          <div key={index} className="h-40 animate-pulse rounded-2xl bg-white ring-1 ring-navy/10" />
-        ))}
-      </div>
+      <div className="mt-8 h-80 animate-pulse rounded-2xl bg-white ring-1 ring-navy/10" />
     </div>
   );
 }
@@ -194,37 +190,49 @@ async function ApplicationsQueue({ params }: { params: Search }) {
 
       {applications.length ? (
         <>
-          <ul className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(16.5rem,1fr))] gap-3">
-            {applications.map((item) => (
-              <li key={item.id} className="min-w-0">
-                <Link
-                  href={`/admin/applications/${item.id}`}
-                  className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-navy/10 transition hover:-translate-y-0.5 hover:ring-orange"
-                >
-                  <span className="h-1.5 shrink-0 bg-orange" aria-hidden />
-                  <div className="flex min-w-0 flex-1 flex-col p-3">
-                    <div className="flex items-start justify-between gap-1.5">
-                      <p className="min-w-0 truncate text-sm font-semibold text-navy">{item.fullName}</p>
+          <div className="mt-8 overflow-x-auto rounded-2xl bg-white ring-1 ring-navy/10">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-navy text-cream">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Applicant</th>
+                  <th className="px-4 py-3 font-semibold">Reference</th>
+                  <th className="px-4 py-3 font-semibold">Email</th>
+                  <th className="px-4 py-3 font-semibold">Qualification</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold">Submitted</th>
+                  <th className="px-4 py-3 text-right font-semibold">Review</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applications.map((item) => (
+                  <tr key={item.id} className="border-t border-navy/10 hover:bg-sand/60">
+                    <td className="px-4 py-3 font-medium text-navy">{item.fullName}</td>
+                    <td className="px-4 py-3 font-medium text-orange">{item.applicationReference}</td>
+                    <td className="px-4 py-3">{item.email}</td>
+                    <td className="px-4 py-3">
+                      <p>{item.degree || "—"}</p>
+                      <p className="text-xs text-muted">
+                        {item.district || "—"} · {item.fieldOfStudy || "—"}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3">
                       <StatusBadge status={item.status as ApplicationStatus} />
-                    </div>
-                    <p className="mt-1 truncate text-xs font-medium text-orange">{item.applicationReference}</p>
-                    <p className="mt-2 truncate text-xs text-navy">{item.email}</p>
-                    <p className="mt-1 truncate text-xs text-muted">{item.fieldOfStudy || "Field not set"}</p>
-                    <p className="truncate text-xs text-muted">
-                      {item.district || "—"} · {item.degree || "—"}
-                    </p>
-                    <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-                      <span className="truncate text-[11px] text-muted">{formatAdminDate(item.submittedAt)}</span>
-                      <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-navy px-2.5 py-1 text-[11px] font-semibold text-white group-hover:bg-orange">
+                    </td>
+                    <td className="px-4 py-3 text-muted">{formatAdminDate(item.submittedAt)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link
+                        href={`/admin/applications/${item.id}`}
+                        className="inline-flex items-center gap-0.5 rounded-full bg-navy px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange"
+                      >
                         Review
                         <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           <nav className="mt-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center" aria-label="Pagination">
             <p className="text-sm text-muted">

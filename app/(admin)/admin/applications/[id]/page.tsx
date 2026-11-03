@@ -78,7 +78,7 @@ export default async function ApplicationDetail({ params }: { params: Promise<{ 
       </div>
       <p className="mt-3 text-sm text-muted">Submitted {formatAdminDate(application.submittedAt)}</p>
 
-      <div className="sticky top-[4.6rem] z-30 mt-6 rounded-2xl bg-navy p-4 text-cream shadow-lg ring-1 ring-orange/40 print:hidden">
+      <div className="mt-6 overflow-y-auto rounded-2xl bg-navy p-4 text-cream shadow-lg ring-1 ring-orange/40 print:hidden">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-orange">Decision</p>

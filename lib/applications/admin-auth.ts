@@ -69,37 +69,74 @@ export function sanitizeAdminPath(next: string | undefined) {
   }
 }
 
-export function isSameOrigin(request: Request) {
-  const allowed = new Set<string>();
+function originFromValue(value: string) {
   try {
-    allowed.add(new URL(request.url).origin);
+    const url = new URL(value.includes("://") ? value : `https://${value}`);
+    if (!url.hostname) return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
+function addAllowedOrigin(allowed: Set<string>, value: string | undefined | null) {
+  const origin = value ? originFromValue(value.trim()) : null;
+  if (!origin) return;
+  allowed.add(origin);
+  try {
+    const url = new URL(origin);
+    const host = url.hostname.toLowerCase();
+    if (host.startsWith("www.")) {
+      allowed.add(`${url.protocol}//${host.slice(4)}`);
+    } else if (host.includes(".")) {
+      allowed.add(`${url.protocol}//www.${host}`);
+    }
   } catch {
     /* ignore */
   }
+}
+
+function allowedOrigins(request: Request) {
+  const allowed = new Set<string>();
+  addAllowedOrigin(allowed, request.url);
   const host = (request.headers.get("x-forwarded-host") || request.headers.get("host") || "").split(",")[0].trim();
   const proto = (request.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https"))
     .split(",")[0]
     .trim();
-  if (host) allowed.add(`${proto}://${host}`);
-  const site = process.env.NEXT_PUBLIC_SITE_URL;
-  if (site) {
-    try {
-      allowed.add(new URL(site).origin);
-    } catch {
-      /* ignore */
-    }
+  if (host) addAllowedOrigin(allowed, `${proto}://${host}`);
+  addAllowedOrigin(allowed, process.env.NEXT_PUBLIC_SITE_URL);
+  addAllowedOrigin(allowed, process.env.VERCEL_PROJECT_PRODUCTION_URL);
+  addAllowedOrigin(allowed, process.env.VERCEL_URL);
+  addAllowedOrigin(allowed, process.env.VERCEL_BRANCH_URL);
+  return allowed;
+}
+
+export function isSameOrigin(request: Request) {
+  const allowed = allowedOrigins(request);
+  const originHeader = request.headers.get("origin")?.trim();
+  if (originHeader && originHeader !== "null") {
+    const origin = originFromValue(originHeader);
+    return Boolean(origin && allowed.has(origin));
   }
-  const origin = request.headers.get("origin");
-  if (origin) return allowed.has(origin);
+
+  const fetchSite = request.headers.get("sec-fetch-site")?.toLowerCase();
+  if (fetchSite === "same-origin" || fetchSite === "same-site") return true;
+
   const referer = request.headers.get("referer");
   if (referer) {
-    try {
-      return allowed.has(new URL(referer).origin);
-    } catch {
-      return false;
-    }
+    const origin = originFromValue(referer);
+    return Boolean(origin && allowed.has(origin));
   }
-  return false;
+
+  // Firefox omits Origin and Referer on same-origin form POSTs when the page
+  // used Referrer-Policy: no-referrer. Cross-site POSTs still send Origin.
+  const contentType = (request.headers.get("content-type") || "").toLowerCase();
+  return (
+    request.method === "POST" &&
+    (!contentType ||
+      contentType.includes("application/x-www-form-urlencoded") ||
+      contentType.includes("multipart/form-data"))
+  );
 }
 
 export async function createAdminToken() {

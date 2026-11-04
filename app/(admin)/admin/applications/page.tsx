@@ -194,20 +194,20 @@ async function ApplicationsQueue({ params }: { params: Search }) {
             <table className="min-w-full text-left text-sm">
               <thead className="bg-navy text-cream">
                 <tr>
-                  <th className="px-4 py-3 font-semibold">Applicant</th>
                   <th className="px-4 py-3 font-semibold">Reference</th>
+                  <th className="px-4 py-3 font-semibold">Applicant</th>
                   <th className="px-4 py-3 font-semibold">Email</th>
                   <th className="px-4 py-3 font-semibold">Qualification</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">Submitted</th>
+                  <th className="px-4 py-3 font-semibold">Submitted Date</th>
                   <th className="px-4 py-3 text-right font-semibold">Review</th>
                 </tr>
               </thead>
               <tbody>
                 {applications.map((item) => (
                   <tr key={item.id} className="border-t border-navy/10 hover:bg-sand/60">
-                    <td className="px-4 py-3 font-medium text-navy">{item.fullName}</td>
                     <td className="px-4 py-3 font-medium text-orange">{item.applicationReference}</td>
+                    <td className="px-4 py-3 font-medium text-navy">{item.fullName}</td>
                     <td className="px-4 py-3">{item.email}</td>
                     <td className="px-4 py-3">
                       <p>{item.degree || "—"}</p>

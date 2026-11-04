@@ -8,7 +8,7 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-const LOGO = "/images/nuevo-logo-ubuntu-2-3_enano.jpg";
+const LOGO = "/images/nuevo-logo-ubuntu.png";
 
 export default function AdminLoginPage({
   searchParams,
@@ -43,9 +43,10 @@ async function AdminLoginInner({
           <Image
             src={LOGO}
             alt="Ubuntu Tech Afrika"
-            width={56}
-            height={56}
-            className="h-14 w-14 rounded-full bg-cream object-contain p-1 ring-2 ring-orange"
+            width={96}
+            height={96}
+            unoptimized
+            className="h-14 w-14 object-contain"
             priority
           />
           <div>

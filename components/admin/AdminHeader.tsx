@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const LOGO = "/images/nuevo-logo-ubuntu-2-3_enano.jpg";
+const LOGO = "/images/nuevo-logo-ubuntu.png";
 
 export function AdminHeader() {
   const pathname = usePathname();
@@ -17,9 +17,10 @@ export function AdminHeader() {
           <Image
             src={LOGO}
             alt="Ubuntu Tech Afrika"
-            width={48}
-            height={48}
-            className="h-12 w-12 rounded-full bg-cream object-contain p-0.5 ring-2 ring-orange"
+            width={96}
+            height={96}
+            unoptimized
+            className="h-12 w-12 object-contain"
             priority
           />
           <div className="min-w-0">

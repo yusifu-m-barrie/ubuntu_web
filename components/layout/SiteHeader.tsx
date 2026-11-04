@@ -38,8 +38,9 @@ export function SiteHeader({ logo, companyName, items }: Props) {
           <Image
             src={logo}
             alt={`${companyName} logo`}
-            width={48}
-            height={48}
+            width={96}
+            height={96}
+            unoptimized
             className="site-logo h-12 w-12 object-contain transition duration-300 hover:scale-105"
           />
           <span className="font-serif text-lg font-semibold text-navy">{companyName}</span>

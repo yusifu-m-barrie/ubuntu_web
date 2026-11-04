@@ -16,7 +16,12 @@ export function imageObjectPosition(source: unknown) {
   return `${Math.round(hotspot.x * 1000) / 10}% ${Math.round(hotspot.y * 1000) / 10}%`;
 }
 
-export function sanityImageUrl(source: unknown, fallback = "", version?: unknown) {
+export function sanityImageUrl(
+  source: unknown,
+  fallback = "",
+  version?: unknown,
+  options?: { format?: "png" },
+) {
   if (!source) return fallback;
   if (typeof source === "string") {
     return withVersion(source, version) || fallback;
@@ -31,7 +36,8 @@ export function sanityImageUrl(source: unknown, fallback = "", version?: unknown
       : source;
 
   try {
-    const url = builder.image(imageSource as Parameters<typeof builder.image>[0]).width(1600).auto("format").url();
+    const image = builder.image(imageSource as Parameters<typeof builder.image>[0]).width(1600);
+    const url = options?.format ? image.format(options.format).url() : image.auto("format").url();
     return withVersion(url || "", version) || fallback;
   } catch {
     return fallback;

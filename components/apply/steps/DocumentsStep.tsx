@@ -313,10 +313,12 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
           const busy = entries.some((entry) => entry.status === "uploading");
 
           const existingFiles = isOther
-            ? documentsRef.current.otherDocument ?? []
-            : documentsRef.current[kind]
-              ? [documentsRef.current[kind] as FileReference]
+            ? value.otherDocument ?? []
+            : value[kind]
+              ? [value[kind] as FileReference]
               : [];
+          const savedFiles = existingFiles.filter((file) => !entries.some((entry) => entry.uploaded === file));
+          const hasFiles = entries.length > 0 || savedFiles.length > 0;
 
           return (
             <Field
@@ -328,7 +330,7 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
               error={errors[kind]}
             >
               <div className="rounded-xl border border-dashed border-navy/20 bg-cream px-4 py-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
                   <div className="shrink-0">
                     <input
                       id={fieldId}
@@ -349,156 +351,80 @@ export function DocumentsStep({ value, onChange, onNext, onBack }: Props) {
                       {isOther ? "Add supporting documents" : "Choose file"}
                     </label>
                   </div>
-                  <div className="min-w-0 flex-1 sm:max-w-md sm:text-left">
-                    {isOther ? (
-                      entries.length === 0 && existingFiles.length === 0 ? (
-                        <p className="text-sm text-muted">No file chosen</p>
-                      ) : (
-                        <ul className="space-y-3">
-                          {entries.map((entry) => (
-                            <li key={entry.id} className="text-sm text-navy">
-                              <div className="flex items-start justify-between gap-3">
-                                <p>
-                                  <span className="font-medium">{entry.filename}</span>
-                                  <span className="text-muted"> · {formatBytes(entry.size)}</span>
+                  <div className="min-w-0">
+                    {hasFiles ? (
+                      <ul className="space-y-3">
+                        {entries.map((entry) => (
+                          <li key={entry.id} className="text-sm text-navy">
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="min-w-0 break-words">
+                                <span className="font-medium">{entry.filename}</span>
+                                <span className="text-muted"> · {formatBytes(entry.size)}</span>
+                                {entry.status === "uploaded" ? " · Uploaded" : null}
+                              </p>
+                              <button
+                                type="button"
+                                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-navy hover:bg-navy/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                                aria-label={`Remove ${entry.filename}`}
+                                onClick={() => removeUpload(entry)}
+                              >
+                                ×
+                              </button>
+                            </div>
+                            {entry.status === "uploading" ? (
+                              <div className="mt-2" aria-live="polite">
+                                <p className="text-xs font-medium">Uploading… {entry.progress}%</p>
+                                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-sand">
+                                  <div
+                                    className="h-full rounded-full bg-orange transition-all"
+                                    style={{ width: `${entry.progress}%` }}
+                                  />
+                                </div>
+                              </div>
+                            ) : null}
+                            {entry.status === "error" ? (
+                              <div className="mt-1 flex items-center gap-3">
+                                <p role="alert" className="text-xs text-red-700">
+                                  {entry.error}
                                 </p>
                                 <button
                                   type="button"
-                                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-navy hover:bg-navy/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
-                                  aria-label={`Remove ${entry.filename}`}
-                                  onClick={() => removeUpload(entry)}
+                                  className="text-xs font-semibold text-orange hover:underline"
+                                  onClick={() => {
+                                    updateUpload(entry.id, (current) => ({
+                                      ...current,
+                                      status: "uploading",
+                                      progress: 0,
+                                      error: undefined,
+                                    }));
+                                    void uploadFile(kind, entry.file, entry.id);
+                                  }}
                                 >
-                                  ×
+                                  Retry
                                 </button>
                               </div>
-                              {entry.status === "uploading" ? (
-                                <div className="mt-2" aria-live="polite">
-                                  <p className="text-xs font-medium">Uploading… {entry.progress}%</p>
-                                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-sand">
-                                    <div
-                                      className="h-full rounded-full bg-orange transition-all"
-                                      style={{ width: `${entry.progress}%` }}
-                                    />
-                                  </div>
-                                </div>
-                              ) : null}
-                              {entry.status === "uploaded" ? (
-                                <p className="text-xs text-green-700">Uploaded</p>
-                              ) : null}
-                              {entry.status === "error" ? (
-                                <div className="mt-1 flex items-center gap-3">
-                                  <p role="alert" className="text-xs text-red-700">
-                                    {entry.error}
-                                  </p>
-                                  <button
-                                    type="button"
-                                    className="text-xs font-semibold text-orange hover:underline"
-                                    onClick={() => {
-                                      updateUpload(entry.id, (current) => ({
-                                        ...current,
-                                        status: "uploading",
-                                        progress: 0,
-                                        error: undefined,
-                                      }));
-                                      void uploadFile(kind, entry.file, entry.id);
-                                    }}
-                                  >
-                                    Retry
-                                  </button>
-                                </div>
-                              ) : null}
-                            </li>
-                          ))}
-                          {existingFiles
-                            .filter((file) => !entries.some((entry) => entry.uploaded === file))
-                            .map((file) => (
-                              <li key={file.pathname} className="flex items-start justify-between gap-3 text-sm text-navy">
-                                <p>
-                                  <span className="font-medium">{file.filename}</span>
-                                  <span className="text-muted"> · {formatBytes(file.size)} · Uploaded</span>
-                                </p>
-                                <button
-                                  type="button"
-                                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-navy hover:bg-navy/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
-                                  aria-label={`Remove ${file.filename}`}
-                                  onClick={() => removeFile(kind, file)}
-                                >
-                                  ×
-                                </button>
-                              </li>
-                            ))}
-                        </ul>
-                      )
+                            ) : null}
+                          </li>
+                        ))}
+                        {savedFiles.map((file) => (
+                          <li key={file.pathname} className="flex items-start justify-between gap-3 text-sm text-navy">
+                            <p className="min-w-0 break-words">
+                              <span className="font-medium">{file.filename}</span>
+                              <span className="text-muted"> · {formatBytes(file.size)} · Uploaded</span>
+                            </p>
+                            <button
+                              type="button"
+                              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-navy hover:bg-navy/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                              aria-label={`Remove ${file.filename}`}
+                              onClick={() => removeFile(kind, file)}
+                            >
+                              ×
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     ) : (
-                      <>
-                        {entries[0] ? (
-                          <div className="flex items-start justify-between gap-3 text-sm text-navy">
-                            <p>
-                              <span className="font-medium">{entries[0].filename}</span>
-                              <span className="text-muted"> · {formatBytes(entries[0].size)}</span>
-                              {entries[0].status === "uploaded" ? " · Uploaded" : null}
-                            </p>
-                            <button
-                              type="button"
-                              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-navy hover:bg-navy/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
-                              aria-label={`Remove ${entries[0].filename}`}
-                              onClick={() => removeUpload(entries[0])}
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ) : existingFiles[0] ? (
-                          <div className="flex items-start justify-between gap-3 text-sm text-navy">
-                            <p>
-                              <span className="font-medium">{existingFiles[0].filename}</span>
-                              <span className="text-muted"> · {formatBytes(existingFiles[0].size)} · Uploaded</span>
-                            </p>
-                            <button
-                              type="button"
-                              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-navy hover:bg-navy/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
-                              aria-label={`Remove ${existingFiles[0].filename}`}
-                              onClick={() => removeFile(kind, existingFiles[0])}
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-muted">No file chosen</p>
-                        )}
-                        {entries[0]?.status === "uploading" ? (
-                          <div className="mt-2" aria-live="polite">
-                            <p className="text-xs font-medium">Uploading… {entries[0].progress}%</p>
-                            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-sand">
-                              <div
-                                className="h-full rounded-full bg-orange transition-all"
-                                style={{ width: `${entries[0].progress}%` }}
-                              />
-                            </div>
-                          </div>
-                        ) : null}
-                        {entries[0]?.status === "error" ? (
-                          <div className="mt-1 flex items-center gap-3">
-                            <p role="alert" className="text-xs text-red-700">
-                              {entries[0].error}
-                            </p>
-                            <button
-                              type="button"
-                              className="text-xs font-semibold text-orange hover:underline"
-                              onClick={() => {
-                                updateUpload(entries[0].id, (entry) => ({
-                                  ...entry,
-                                  status: "uploading",
-                                  progress: 0,
-                                  error: undefined,
-                                }));
-                                void uploadFile(kind, entries[0].file, entries[0].id);
-                              }}
-                            >
-                              Retry
-                            </button>
-                          </div>
-                        ) : null}
-                      </>
+                      <p className="pt-1.5 text-sm text-muted">No file chosen</p>
                     )}
                   </div>
                 </div>

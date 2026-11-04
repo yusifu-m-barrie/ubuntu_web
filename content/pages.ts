@@ -15,8 +15,8 @@ export const siteSettings: SiteSettings = {
   companyName: "Ubuntu Afrika",
   shortName: "Ubuntu Afrika",
   tagline: "I am Because We Are",
-  logo: "/images/nuevo-logo-ubuntu-2-3_enano.jpg",
-  favicon: "/images/nuevo-logo-ubuntu-2-3_enano.jpg",
+  logo: "/images/nuevo-logo-ubuntu.png",
+  favicon: "/images/nuevo-logo-ubuntu.png",
   phoneFooter: "+23278-662815",
   phoneContact: "+23278-668-215",
   emails: [

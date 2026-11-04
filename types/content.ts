@@ -127,6 +127,10 @@ export type ApplyPage = {
   documentsNote: string;
   processTitle: string;
   processBody: string;
+  privacyTitle: string;
+  privacyIntro: string;
+  privacyPoints: string[];
+  privacyContact: string;
   readyTitle: string;
   sendTo: string;
   closingDate: string;

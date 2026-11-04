@@ -1,5 +1,6 @@
 import { ApplyFlyer } from "@/components/apply/ApplyFlyer";
 import { ApplyStartActions } from "@/components/apply/ApplyStartActions";
+import { PrivacyNotice } from "@/components/apply/PrivacyNotice";
 import { Reveal } from "@/components/motion/Reveal";
 import { CtaLink } from "@/components/ui/PageHero";
 import { APPLICATION_STEPS } from "@/lib/applications/constants";
@@ -9,7 +10,7 @@ import {
   applicationsOpen,
 } from "@/lib/applications/deadline";
 import { loadContent, siteUrl } from "@/lib/content";
-import { CalendarDays, CheckCircle2, FileText, GraduationCap } from "lucide-react";
+import { CalendarDays, CheckCircle2, FileText, GraduationCap, Shield } from "lucide-react";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -131,6 +132,22 @@ export default async function ApplyLanding() {
               </Reveal>
             ))}
           </ol>
+        </div>
+      </section>
+
+      <section className="bg-cream py-16 lg:py-20">
+        <div className="mx-auto max-w-6xl px-4 lg:px-6">
+          <Reveal>
+            <div className="mb-6">
+              <Shield className="h-8 w-8 text-orange" aria-hidden />
+            </div>
+            <PrivacyNotice
+              title={apply.privacyTitle}
+              intro={apply.privacyIntro}
+              points={apply.privacyPoints}
+              contact={apply.privacyContact}
+            />
+          </Reveal>
         </div>
       </section>
 

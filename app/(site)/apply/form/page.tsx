@@ -1,7 +1,8 @@
 import { ApplyWizard } from "@/components/apply/ApplyWizard";
+import { PrivacyNotice } from "@/components/apply/PrivacyNotice";
 import { PageHero } from "@/components/ui/PageHero";
 import { APPLICATION_CLOSING_LABEL, APPLICATIONS_CLOSED_MESSAGE, applicationsOpen } from "@/lib/applications/deadline";
-import { siteUrl } from "@/lib/content";
+import { loadContent, siteUrl } from "@/lib/content";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -16,7 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function ApplyFormPage() {
+export default async function ApplyFormPage() {
+  const { apply } = await loadContent();
   const open = applicationsOpen();
 
   return (
@@ -35,6 +37,15 @@ export default function ApplyFormPage() {
               Your answers are saved as you move between steps. Documents may be PDF, Word, JPEG, or PNG files of 10 MB or
               less. Each person may submit only one application for this intake.
             </p>
+            <div className="mt-6">
+              <PrivacyNotice
+                title={apply.privacyTitle}
+                intro={apply.privacyIntro}
+                points={apply.privacyPoints}
+                contact={apply.privacyContact}
+                compact
+              />
+            </div>
             <div className="mt-8 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-navy/10 sm:p-8">
               <ApplyWizard />
             </div>

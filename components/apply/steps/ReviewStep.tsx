@@ -4,6 +4,7 @@ import { StepActions } from "@/components/apply/Fields";
 import { displayFieldOfStudy, DOCUMENT_KINDS, DOCUMENT_LABELS } from "@/lib/applications/constants";
 import { fullName } from "@/lib/applications/reference";
 import type { ApplicationDraft } from "@/types/application";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import React from "react";
 
@@ -184,8 +185,12 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
             required
           />
           <span>
-            I confirm that the information and documents I have provided are true and complete, and I consent to Ubuntu
-            Afrika processing this application.
+            I confirm that the information and documents I have provided are true and complete. I have read the{" "}
+            <Link href="/apply#data-protection" className="font-semibold text-orange hover:underline">
+              Data protection notice
+            </Link>{" "}
+            and I consent to Ubuntu Tech Afrika using my personal data to assess this application, contact me about this
+            intake, and keep the application process secure.
           </span>
         </label>
 

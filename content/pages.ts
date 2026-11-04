@@ -246,6 +246,18 @@ export const applyPage: ApplyPage = {
   processTitle: "Simple process",
   processBody:
     "Five short steps: personal details, qualification, motivation, documents, then review and submit. Each person may submit only one application for this intake.",
+  privacyTitle: "Data protection and use of your information",
+  privacyIntro:
+    "Ubuntu Tech Afrika processes the personal data you submit so we can run a fair and secure application process for this postgraduate intake.",
+  privacyPoints: [
+    "We collect the identity and contact details, education history, and documents you provide on this form.",
+    "We use this information to assess your application, verify identity and documents, prevent duplicate or unauthorised submissions, contact you about this intake, and administer the programme if you are admitted.",
+    "Access is limited to authorised Ubuntu Tech Afrika staff involved in admissions and programme administration.",
+    "Application records and files are stored securely and are not published on the public website.",
+    "We do not sell your personal data and we do not use it for unrelated marketing.",
+    "You may request a copy of your application data, or ask us to correct it, by using the contact details below.",
+  ],
+  privacyContact: "For data protection questions, email d.salifu@ubuntuafrika.com.",
   readyTitle: "Ready to begin?",
   sendTo: "d.salifu@ubuntuafrika.com",
   closingDate: "4 December 2026, 23:59 GMT",

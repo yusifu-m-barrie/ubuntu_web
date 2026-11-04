@@ -1,4 +1,5 @@
 import { ADMIN_PAGE_SIZE } from "@/lib/applications/constants";
+import { APPLICATIONS_CLOSED_MESSAGE, applicationsOpen } from "@/lib/applications/deadline";
 import { ApplicationError, ApplicationNotFoundError, toApplicationHttpError } from "@/lib/applications/errors";
 import {
   addNotesSchema,
@@ -12,6 +13,9 @@ import type { ApplicationListQuery, ApplicationListResult, ApplicationRecord, Ap
 export { toApplicationHttpError };
 
 export async function createApplication(input: unknown): Promise<ApplicationRecord> {
+  if (!applicationsOpen()) {
+    throw new ApplicationError(APPLICATIONS_CLOSED_MESSAGE, 403, "APPLICATIONS_CLOSED");
+  }
   const parsed = submitApplicationSchema.safeParse(input);
   if (!parsed.success) {
     throw new ApplicationError(parsed.error.issues[0]?.message || "Please complete every required field.");

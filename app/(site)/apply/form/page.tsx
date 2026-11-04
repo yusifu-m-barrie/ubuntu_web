@@ -1,5 +1,6 @@
 import { ApplyWizard } from "@/components/apply/ApplyWizard";
 import { PageHero } from "@/components/ui/PageHero";
+import { APPLICATION_CLOSING_LABEL, APPLICATIONS_CLOSED_MESSAGE, applicationsOpen } from "@/lib/applications/deadline";
 import { siteUrl } from "@/lib/content";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -16,6 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function ApplyFormPage() {
+  const open = applicationsOpen();
+
   return (
     <>
       <PageHero kicker="Application" title="Graduate/Postgraduate programme application" />
@@ -25,13 +28,23 @@ export default function ApplyFormPage() {
             Back to programme information
           </Link>
         </p>
-        <p className="mt-4 text-sm text-muted">
-          Your answers are saved as you move between steps. Documents may be PDF, Word, JPEG, or PNG files of 10 MB or
-          less. Each person may submit only one application for this intake.
-        </p>
-        <div className="mt-8 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-navy/10 sm:p-8">
-          <ApplyWizard />
-        </div>
+        {open ? (
+          <>
+            <p className="mt-4 text-base font-bold text-navy">Applications close on {APPLICATION_CLOSING_LABEL}.</p>
+            <p className="mt-3 text-sm text-muted">
+              Your answers are saved as you move between steps. Documents may be PDF, Word, JPEG, or PNG files of 10 MB or
+              less. Each person may submit only one application for this intake.
+            </p>
+            <div className="mt-8 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-navy/10 sm:p-8">
+              <ApplyWizard />
+            </div>
+          </>
+        ) : (
+          <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-navy/10 sm:p-8">
+            <p className="text-lg font-bold text-navy">{APPLICATIONS_CLOSED_MESSAGE}</p>
+            <p className="mt-3 text-sm text-muted">This intake is no longer accepting applications.</p>
+          </div>
+        )}
       </div>
     </>
   );

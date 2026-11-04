@@ -1,4 +1,5 @@
 import { DOCUMENT_KINDS } from "@/lib/applications/constants";
+import { APPLICATIONS_CLOSED_MESSAGE, applicationsOpen } from "@/lib/applications/deadline";
 import { saveApplicationFile } from "@/lib/applications/files";
 import { isDocumentKindValue } from "@/lib/applications/file-types";
 import { clientKey, consumeRateLimit } from "@/lib/applications/rate-limit";
@@ -13,6 +14,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!applicationsOpen()) {
+    return NextResponse.json({ error: APPLICATIONS_CLOSED_MESSAGE }, { status: 403 });
+  }
   const limited = consumeRateLimit("upload", clientKey(request), 20, 15 * 60 * 1000);
   if (!limited.allowed) {
     return NextResponse.json(

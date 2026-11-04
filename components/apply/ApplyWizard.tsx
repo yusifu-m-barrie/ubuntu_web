@@ -8,6 +8,7 @@ import { PersonalStep } from "@/components/apply/steps/PersonalStep";
 import { ReviewStep } from "@/components/apply/steps/ReviewStep";
 import { SuccessPanel } from "@/components/apply/SuccessPanel";
 import { DEFAULT_PROGRAMME, DRAFT_TTL_MS } from "@/lib/applications/constants";
+import { APPLICATIONS_CLOSED_MESSAGE, applicationsOpen } from "@/lib/applications/deadline";
 import { clearStoredDraft, emptyDraft, readStoredDraft, writeStoredDraft } from "@/lib/applications/draft";
 import { applicationPayloadSchema } from "@/lib/applications/schema";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -156,6 +157,10 @@ export function ApplyWizard() {
     });
     if (!parsed.success) {
       setSubmitError(parsed.error.issues[0]?.message || "Please review the form and complete the missing fields.");
+      return;
+    }
+    if (!applicationsOpen()) {
+      setSubmitError(APPLICATIONS_CLOSED_MESSAGE);
       return;
     }
     submittingRef.current = true;

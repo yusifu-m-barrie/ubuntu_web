@@ -3,7 +3,11 @@ import { ApplyStartActions } from "@/components/apply/ApplyStartActions";
 import { Reveal } from "@/components/motion/Reveal";
 import { CtaLink } from "@/components/ui/PageHero";
 import { APPLICATION_STEPS } from "@/lib/applications/constants";
-import { configuredDeadline } from "@/lib/applications/deadline";
+import {
+  APPLICATION_CLOSING_LABEL,
+  APPLICATIONS_CLOSED_MESSAGE,
+  applicationsOpen,
+} from "@/lib/applications/deadline";
 import { loadContent, siteUrl } from "@/lib/content";
 import { CalendarDays, CheckCircle2, FileText, GraduationCap } from "lucide-react";
 import type { Metadata } from "next";
@@ -21,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ApplyLanding() {
   const { apply } = await loadContent();
-  const deadline = configuredDeadline(apply.closingDate);
+  const open = applicationsOpen();
 
   return (
     <>
@@ -47,14 +51,12 @@ export default async function ApplyLanding() {
             ) : null}
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-sand">{apply.intro}</p>
             {apply.headline ? <p className="mt-4 max-w-xl text-sm text-cream/80">{apply.headline}</p> : null}
+            <p className="mt-6 inline-flex max-w-xl items-start gap-2 text-lg font-bold text-white md:text-xl">
+              <CalendarDays className="mt-0.5 h-6 w-6 shrink-0 text-orange" aria-hidden />
+              {open ? `Applications close on ${APPLICATION_CLOSING_LABEL}` : APPLICATIONS_CLOSED_MESSAGE}
+            </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <ApplyStartActions className="" />
-              {deadline ? (
-                <p className="inline-flex items-center gap-2 rounded-full border border-cream/20 bg-white/5 px-4 py-3 text-sm text-sand">
-                  <CalendarDays className="h-4 w-4 text-orange" aria-hidden />
-                  Deadline: <span className="font-semibold text-cream">{deadline}</span>
-                </p>
-              ) : null}
+              <ApplyStartActions className="" open={open} />
             </div>
           </div>
 
@@ -143,9 +145,14 @@ export default async function ApplyLanding() {
         <div className="relative mx-auto max-w-3xl px-4">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange">Apply</p>
           <h2 className="mt-4 font-serif text-3xl font-bold md:text-4xl">{apply.readyTitle}</h2>
-          <div className="mt-8 flex justify-center">
-            <CtaLink href="/apply/form">Start Application</CtaLink>
-          </div>
+          <p className="mt-4 text-lg font-bold text-white">
+            {open ? `Applications close on ${APPLICATION_CLOSING_LABEL}` : APPLICATIONS_CLOSED_MESSAGE}
+          </p>
+          {open ? (
+            <div className="mt-8 flex justify-center">
+              <CtaLink href="/apply/form">Start Application</CtaLink>
+            </div>
+          ) : null}
         </div>
       </section>
     </>

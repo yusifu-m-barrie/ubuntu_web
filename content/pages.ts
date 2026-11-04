@@ -248,7 +248,7 @@ export const applyPage: ApplyPage = {
     "Five short steps: personal details, qualification, motivation, documents, then review and submit. Each person may submit only one application for this intake.",
   readyTitle: "Ready to begin?",
   sendTo: "d.salifu@ubuntuafrika.com",
-  closingDate: "21 April, 2025",
+  closingDate: "4 December 2026, 23:59 GMT",
   ctaLabel: "SEND YOUR APPLICATION NOW",
   ctaMailto:
     "mailto:d.salifu@ubuntuafrika.com?subject=5th%20Cohort%20Software%20Engineering%20Application",

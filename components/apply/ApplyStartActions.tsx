@@ -4,7 +4,13 @@ import { CtaLink } from "@/components/ui/PageHero";
 import { readStoredDraft } from "@/lib/applications/draft";
 import { useEffect, useState } from "react";
 
-export function ApplyStartActions({ className = "mt-8" }: { className?: string }) {
+export function ApplyStartActions({
+  className = "mt-8",
+  open = true,
+}: {
+  className?: string;
+  open?: boolean;
+}) {
   const [label, setLabel] = useState("Start Application");
 
   useEffect(() => {
@@ -14,6 +20,8 @@ export function ApplyStartActions({ className = "mt-8" }: { className?: string }
       setLabel("Continue application");
     }
   }, []);
+
+  if (!open) return null;
 
   return (
     <div className={className}>

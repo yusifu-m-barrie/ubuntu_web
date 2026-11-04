@@ -142,37 +142,30 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
               Edit
             </button>
           </header>
-          <ul className="space-y-2 text-sm">
+          <ul className="space-y-3 text-sm">
             {DOCUMENT_KINDS.map((kind) => {
-              if (kind === "otherDocument") {
-                const files = draft.documents.otherDocument ?? [];
-
-                return (
-                  <li key={kind} className="flex min-w-0 flex-col gap-1">
-                    <span className="text-muted">{DOCUMENT_LABELS[kind]}</span>
-                    {files.length ? (
-                      <span className="min-w-0 break-words font-medium text-navy [overflow-wrap:anywhere]">
-                        {files.map((file) => (
-                          <span key={file.pathname} className="block py-0.5">
-                            {file.filename}
-                          </span>
-                        ))}
-                      </span>
-                    ) : (
-                      <span className="font-medium text-navy">Not provided</span>
-                    )}
-                  </li>
-                );
-              }
-
-              const file = draft.documents[kind];
+              const files =
+                kind === "otherDocument"
+                  ? draft.documents.otherDocument ?? []
+                  : draft.documents[kind]
+                    ? [draft.documents[kind]]
+                    : [];
+              const emptyLabel = kind === "otherDocument" ? "Not provided" : "Missing";
 
               return (
-                <li key={kind} className="flex min-w-0 justify-between gap-3">
-                  <span className="min-w-0 shrink-0 text-muted">{DOCUMENT_LABELS[kind]}</span>
-                  <span className="min-w-0 overflow-hidden break-words text-right font-medium text-navy [overflow-wrap:anywhere]">
-                    {file?.filename || "Missing"}
-                  </span>
+                <li key={kind} className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
+                  <span className="text-muted">{DOCUMENT_LABELS[kind]}</span>
+                  <div className="min-w-0 text-right font-medium text-navy">
+                    {files.length ? (
+                      files.map((file) => (
+                        <p key={file.pathname} className="break-words [overflow-wrap:anywhere]">
+                          {file.filename}
+                        </p>
+                      ))
+                    ) : (
+                      <p>{emptyLabel}</p>
+                    )}
+                  </div>
                 </li>
               );
             })}

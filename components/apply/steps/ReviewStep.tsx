@@ -153,12 +153,15 @@ export function ReviewStep({ draft, error, submitting, onBack, onEdit, onDeclara
               const emptyLabel = kind === "otherDocument" ? "Not provided" : "Missing";
 
               return (
-                <li key={kind} className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
-                  <span className="text-muted">{DOCUMENT_LABELS[kind]}</span>
-                  <div className="min-w-0 text-right font-medium text-navy">
+                <li key={kind} className="flex items-start justify-between gap-4">
+                  <span className="w-[46%] shrink-0 text-muted">{DOCUMENT_LABELS[kind]}</span>
+                  <div className="min-w-0 w-[54%] text-right font-medium text-navy">
                     {files.length ? (
-                      files.map((file) => (
-                        <p key={file.pathname} className="break-words [overflow-wrap:anywhere]">
+                      files.map((file, index) => (
+                        <p
+                          key={`${file.pathname}-${file.filename}-${index}`}
+                          className="break-words [overflow-wrap:anywhere]"
+                        >
                           {file.filename}
                         </p>
                       ))

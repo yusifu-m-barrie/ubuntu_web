@@ -82,7 +82,7 @@ export function applicantConfirmationEmail(record: ApplicationRecord) {
     "",
     `Dear ${record.firstName},`,
     "",
-    `Thank you for applying to ${BRAND}. We have received your application.`,
+    "Thank you for applying to Ubuntu Postgraduate Training 2026. We have received your application.",
     "",
     `Applicant name: ${name}`,
     `Programme: ${record.programme}`,
@@ -101,7 +101,7 @@ export function applicantConfirmationEmail(record: ApplicationRecord) {
     "Application Received",
     `
       <p style="margin:0 0 16px;">Dear ${escapeHtml(record.firstName)},</p>
-      <p style="margin:0 0 16px;">Thank you for applying to ${escapeHtml(BRAND)}. We have received your application.</p>
+      <p style="margin:0 0 16px;">Thank you for applying to Ubuntu Postgraduate Training 2026. We have received your application.</p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 20px;border-top:1px solid #eadfce;border-bottom:1px solid #eadfce;">
         ${detailRow("Applicant name", name)}
         ${detailRow("Programme", record.programme)}

@@ -95,7 +95,7 @@ export const DRAFT_STORAGE_KEY = "uta-application-draft-v5";
 export const DRAFT_TTL_MS = 60 * 60 * 1000;
 export const ADMIN_COOKIE = "uta_admin";
 export const REFERENCE_PREFIX = "UTA";
-export const ADMIN_PAGE_SIZE = 48;
+export const ADMIN_PAGE_SIZE = 10;
 
 export const MOTIVATION_MIN_WORDS = 50;
 export const MOTIVATION_MAX_WORDS = 250;

@@ -1,6 +1,6 @@
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { formatAdminDate } from "@/lib/applications/admin-format";
-import { APPLICATION_STATUSES, FIELDS_OF_STUDY, STATUS_LABELS } from "@/lib/applications/constants";
+import { ADMIN_PAGE_SIZE, APPLICATION_STATUSES, FIELDS_OF_STUDY, STATUS_LABELS } from "@/lib/applications/constants";
 import { listApplications } from "@/lib/applications/service";
 import type { ApplicationCounts, ApplicationStatus } from "@/types/application";
 import { ChevronRight } from "lucide-react";
@@ -135,7 +135,7 @@ async function ApplicationsQueue({ params }: { params: Search }) {
   const counts = result?.counts;
   const total = result?.total || 0;
   const page = result?.page || 1;
-  const pageSize = result?.pageSize || 48;
+  const pageSize = result?.pageSize || ADMIN_PAGE_SIZE;
   const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);

@@ -17,8 +17,8 @@ export const siteSettings: SiteSettings = {
   tagline: "I am Because We Are",
   logo: "/images/nuevo-logo-ubuntu.png",
   favicon: "/images/nuevo-logo-ubuntu.png",
-  phoneFooter: "+23278-662815",
-  phoneContact: "+23278-668-215",
+  phoneFooter: "+23278-668215",
+  phoneContact: "+23278-668215",
   emails: [
     "d.salifu@ubuntuafrika.com",
     "l.nieto@ubuntuafrika.com",

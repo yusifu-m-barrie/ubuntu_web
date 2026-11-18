@@ -59,6 +59,16 @@ export function adminNotifiedEvent(applicationId: string, at: string): Applicati
   };
 }
 
+export function shortlistedNotifiedEvent(applicationId: string, at: string): ApplicationHistoryEvent {
+  return {
+    id: `shortlist-email:${applicationId}`,
+    at,
+    type: "SHORTLISTED_NOTIFIED",
+    actor: "System",
+    message: "Shortlist notification email sent to the applicant",
+  };
+}
+
 export function hasHistoryType(history: ApplicationHistoryEvent[] | undefined, type: ApplicationHistoryEvent["type"]) {
   return Boolean(history?.some((event) => event.type === type));
 }

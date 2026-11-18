@@ -117,6 +117,52 @@ export function applicantConfirmationEmail(record: ApplicationRecord) {
   return { subject, text, html };
 }
 
+export function applicantShortlistedEmail(record: ApplicationRecord) {
+  const name = applicantName(record);
+  const programme = "Ubuntu Postgraduate Training 2026";
+  const subject = `You have been shortlisted — ${record.applicationReference}`;
+  const text = [
+    BRAND,
+    "",
+    "Application shortlisted",
+    "",
+    `Dear ${record.firstName},`,
+    "",
+    `We write to inform you that your application for ${programme} has been shortlisted for the next stage of the selection process.`,
+    "",
+    `Applicant name: ${name}`,
+    `Programme: ${record.programme || programme}`,
+    `Application reference: ${record.applicationReference}`,
+    "",
+    "The admissions team will contact you at this email address with any further instructions, including arrangements for the next stage. Please monitor this inbox, including your junk or spam folder.",
+    "",
+    "Please keep your application reference number for all correspondence. You do not need to reply to this message unless we request additional information.",
+    "",
+    "Yours sincerely,",
+    "Admissions Office",
+    BRAND,
+    "Makeni, Sierra Leone",
+  ].join("\n");
+
+  const html = layout(
+    "Application shortlisted",
+    `
+      <p style="margin:0 0 16px;">Dear ${escapeHtml(record.firstName)},</p>
+      <p style="margin:0 0 16px;">We write to inform you that your application for ${escapeHtml(programme)} has been shortlisted for the next stage of the selection process.</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 20px;border-top:1px solid #eadfce;border-bottom:1px solid #eadfce;">
+        ${detailRow("Applicant name", name)}
+        ${detailRow("Programme", record.programme || programme)}
+        ${detailRow("Application reference", record.applicationReference)}
+      </table>
+      <p style="margin:0 0 16px;">The admissions team will contact you at this email address with any further instructions, including arrangements for the next stage. Please monitor this inbox, including your junk or spam folder.</p>
+      <p style="margin:0 0 16px;">Please keep your application reference number for all correspondence. You do not need to reply to this message unless we request additional information.</p>
+      <p style="margin:0;">Yours sincerely,<br />Admissions Office<br />${escapeHtml(BRAND)}<br />Makeni, Sierra Leone</p>
+    `,
+  );
+
+  return { subject, text, html };
+}
+
 export function adminNotificationEmail(record: ApplicationRecord, reviewUrl: string) {
   const name = applicantName(record);
   const submitted = formatSubmissionDate(record.submittedAt);

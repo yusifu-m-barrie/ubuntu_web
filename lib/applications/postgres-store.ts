@@ -551,7 +551,7 @@ export const postgresStore: ApplicationStore = {
       return current;
     }
     if (
-      (event.type === "APPLICANT_NOTIFIED" || event.type === "ADMIN_NOTIFIED") &&
+      (event.type === "APPLICANT_NOTIFIED" || event.type === "ADMIN_NOTIFIED" || event.type === "SHORTLISTED_NOTIFIED") &&
       current.history.some((item) => item.type === event.type)
     ) {
       return current;

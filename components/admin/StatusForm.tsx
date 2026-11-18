@@ -78,6 +78,9 @@ export function StatusForm({ id, status }: { id: string; status: ApplicationStat
             </h2>
             <p className="mt-3 text-sm text-muted">
               This will change the status from {STATUS_LABELS[status]} to {STATUS_LABELS[value]}.
+              {value === "SHORTLISTED"
+                ? " The applicant will receive a formal email confirming that they have been shortlisted for the next stage."
+                : ""}
               {sensitive ? " This decision should be confirmed before continuing." : ""}
             </p>
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

@@ -7,6 +7,7 @@ import {
   submitApplicationSchema,
   updateStatusSchema,
 } from "@/lib/applications/schema";
+import { notifyApplicantShortlisted } from "@/lib/applications/notify";
 import { getApplicationStore } from "@/lib/applications/store";
 import type { ApplicationListQuery, ApplicationListResult, ApplicationRecord, ApplicationStatus } from "@/types/application";
 
@@ -65,8 +66,16 @@ export async function updateApplicationStatus(id: string, input: unknown): Promi
     throw new ApplicationError("Choose a valid status.");
   }
   const store = await getApplicationStore();
+  const previous = await store.get(id);
   const updated = await store.updateStatus(id, parsed.data.status as ApplicationStatus, parsed.data.reviewedBy || "Admin");
   if (!updated) throw new ApplicationNotFoundError();
+  if (parsed.data.status === "SHORTLISTED" && previous?.status !== "SHORTLISTED") {
+    try {
+      await notifyApplicantShortlisted(updated);
+    } catch {
+      /* Status is saved even if the shortlist email cannot be sent. */
+    }
+  }
   return updated;
 }
 

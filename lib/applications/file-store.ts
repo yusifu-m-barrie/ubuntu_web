@@ -193,7 +193,7 @@ export const fileStore: ApplicationStore = {
       return record;
     }
     if (
-      (event.type === "APPLICANT_NOTIFIED" || event.type === "ADMIN_NOTIFIED") &&
+      (event.type === "APPLICANT_NOTIFIED" || event.type === "ADMIN_NOTIFIED" || event.type === "SHORTLISTED_NOTIFIED") &&
       history.some((item) => item.type === event.type)
     ) {
       return record;

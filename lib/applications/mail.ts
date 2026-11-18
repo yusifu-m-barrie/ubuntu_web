@@ -7,6 +7,7 @@ export type OutgoingEmail = {
   html: string;
   replyTo?: string;
   headers?: Record<string, string>;
+  idempotencyKey?: string;
 };
 
 export function mailConfigured() {
@@ -43,15 +44,18 @@ export async function sendApplicationEmail(message: OutgoingEmail) {
   try {
     const { Resend } = await import("resend");
     const resend = new Resend(apiKey);
-    const result = await resend.emails.send({
-      from: mailFromAddress(),
-      to,
-      subject: message.subject,
-      text: message.text,
-      html: message.html,
-      ...(message.replyTo ? { replyTo: message.replyTo } : {}),
-      ...(message.headers ? { headers: message.headers } : {}),
-    });
+    const result = await resend.emails.send(
+      {
+        from: mailFromAddress(),
+        to,
+        subject: message.subject,
+        text: message.text,
+        html: message.html,
+        ...(message.replyTo ? { replyTo: message.replyTo } : {}),
+        ...(message.headers ? { headers: message.headers } : {}),
+      },
+      message.idempotencyKey ? { idempotencyKey: message.idempotencyKey } : undefined,
+    );
     if (result.error) {
       return { sent: false as const, skipped: false as const, error: result.error.message || "Email provider rejected the message." };
     }

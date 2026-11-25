@@ -165,16 +165,14 @@ export function applicantShortlistedEmail(record: ApplicationRecord) {
 
 export function applicantRejectedEmail(record: ApplicationRecord) {
   const name = applicantName(record);
-  const programme = "Ubuntu Postgraduate Training 2026";
+  const programme = "Ubuntu Postgraduate";
   const subject = `Application update — ${record.applicationReference}`;
   const text = [
     BRAND,
     "",
-    "Application update",
-    "",
     `Dear ${record.firstName},`,
     "",
-    `Thank you for your application to ${programme}. After careful consideration, we regret to inform you that we are unable to progress your application on this occasion.`,
+    "Thank you for your application to Ubuntu Postgraduate Training 2026. After carefully reviewing your application, we regret to inform you that we are unable to continue with your application.",
     "",
     `Applicant name: ${name}`,
     `Programme: ${record.programme || programme}`,
@@ -183,23 +181,22 @@ export function applicantRejectedEmail(record: ApplicationRecord) {
     "We appreciate the time and effort you invested in your application and your interest in Ubuntu Tech Afrika. We wish you every success in your future endeavours.",
     "",
     "Yours sincerely,",
-    "Admissions Office",
-    BRAND,
-    "Makeni, Sierra Leone",
+    "Ubuntu Tech Afrika",
+    "Sierra Leone",
   ].join("\n");
 
   const html = layout(
     "Application update",
     `
       <p style="margin:0 0 16px;">Dear ${escapeHtml(record.firstName)},</p>
-      <p style="margin:0 0 16px;">Thank you for your application to ${escapeHtml(programme)}. After careful consideration, we regret to inform you that we are unable to progress your application on this occasion.</p>
+      <p style="margin:0 0 16px;">Thank you for your application to Ubuntu Postgraduate Training 2026. After carefully reviewing your application, we regret to inform you that we are unable to continue with your application.</p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 20px;border-top:1px solid #eadfce;border-bottom:1px solid #eadfce;">
         ${detailRow("Applicant name", name)}
         ${detailRow("Programme", record.programme || programme)}
         ${detailRow("Application reference", record.applicationReference)}
       </table>
       <p style="margin:0 0 16px;">We appreciate the time and effort you invested in your application and your interest in ${escapeHtml(BRAND)}. We wish you every success in your future endeavours.</p>
-      <p style="margin:0;">Yours sincerely,<br />Admissions Office<br />${escapeHtml(BRAND)}<br />Makeni, Sierra Leone</p>
+      <p style="margin:0;">Yours sincerely,<br />${escapeHtml(BRAND)}<br />Sierra Leone</p>
     `,
   );
 

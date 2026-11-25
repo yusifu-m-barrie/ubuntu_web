@@ -96,6 +96,7 @@ export const APPLICATION_HISTORY_TYPES = [
   "APPLICANT_NOTIFIED",
   "ADMIN_NOTIFIED",
   "SHORTLISTED_NOTIFIED",
+  "REJECTED_NOTIFIED",
 ] as const;
 export type ApplicationHistoryType = (typeof APPLICATION_HISTORY_TYPES)[number];
 

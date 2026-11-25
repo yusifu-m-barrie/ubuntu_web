@@ -7,7 +7,7 @@ import {
   submitApplicationSchema,
   updateStatusSchema,
 } from "@/lib/applications/schema";
-import { notifyApplicantShortlisted } from "@/lib/applications/notify";
+import { notifyApplicantRejected, notifyApplicantShortlisted } from "@/lib/applications/notify";
 import { getApplicationStore } from "@/lib/applications/store";
 import type { ApplicationListQuery, ApplicationListResult, ApplicationRecord, ApplicationStatus } from "@/types/application";
 
@@ -74,6 +74,13 @@ export async function updateApplicationStatus(id: string, input: unknown): Promi
       await notifyApplicantShortlisted(updated);
     } catch {
       /* Status is saved even if the shortlist email cannot be sent. */
+    }
+  }
+  if (parsed.data.status === "REJECTED" && previous?.status !== "REJECTED") {
+    try {
+      await notifyApplicantRejected(updated);
+    } catch {
+      /* Status is saved even if the outcome email cannot be sent. */
     }
   }
   return updated;

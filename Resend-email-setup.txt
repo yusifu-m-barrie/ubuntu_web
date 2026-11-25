@@ -1,0 +1,126 @@
+UBUNTU TECH AFRIKA — EMAIL SETUP (RESEND + HOSTGATOR + VERCEL)
+Date: 4 November 2026
+Sending address: Ubuntu Tech Afrika <applications@ubuntuafrikasl.com>
+Resend domain: ubuntuafrikasl.com
+
+============================================================
+PART 1 — FOR THE PERSON WITH DOMAIN DNS ACCESS
+(send this section to the domain owner)
+============================================================
+
+DNS for ubuntuafrikasl.com is managed at NAMECHEAP, not HostGator.
+
+Current nameservers:
+  dns1.registrar-servers.com
+  dns2.registrar-servers.com
+
+That is why HostGator cannot add this MX: HostGator is not the DNS host,
+and its mail dropdown only lists HostGator mailbox products. Resend is
+not in that list. Do not try to add this MX in HostGator.
+
+Where to add the record:
+  Namecheap → Domain List → ubuntuafrikasl.com → Manage → Advanced DNS
+  → Add New Record
+
+Already live (do not change these):
+  TXT   resend._domainkey
+  TXT   send
+  CNAME rsend
+
+Still missing (this is the Resend error):
+  MX for send.ubuntuafrikasl.com
+
+HOW TO ADD THE MX IN NAMECHEAP
+- Do NOT use the “MX Records / Email forwarding / Gmail / Microsoft”
+  dropdown at the top of the page. That list is only for inbox products.
+- Use Advanced DNS → Add New Record → type MX Record.
+- Fill the row yourself. Mail server is a text box, not a product list.
+
+  Type:        MX Record
+  Host:        send
+  Value / Mail server:  feedback-smtp.us-east-1.amazonses.com.
+  Priority:    10
+  TTL:         Automatic (or 30 min)
+
+Notes:
+- Host must be “send” only. Namecheap will turn that into
+  send.ubuntuafrikasl.com. Do not type the full domain in Host.
+- Put a dot at the end of the mail server:
+  feedback-smtp.us-east-1.amazonses.com.
+  That stops Namecheap adding “.ubuntuafrikasl.com” onto the value.
+- Do NOT add or change MX on Host “@”. The existing @ MX records
+  (eforward*.registrar-servers.com) must stay so normal domain mail
+  and forwarding keep working. Resend only needs MX on “send”.
+
+If Namecheap still will not save an MX on host “send”:
+  1. Stay on Advanced DNS (not Email / HostGator).
+  2. Confirm you chose record type MX Record, not CNAME or A.
+  3. Ask Namecheap live chat: “Please add an MX record:
+     host send, priority 10, mail server
+     feedback-smtp.us-east-1.amazonses.com.”
+
+After saving:
+1. Wait 10–30 minutes (sometimes up to a few hours).
+2. Check that send.ubuntuafrikasl.com has an MX of
+   feedback-smtp.us-east-1.amazonses.com
+3. In Resend → Domains → ubuntuafrikasl.com, click Verify /
+   Restart verification.
+4. Status must become Verified before applicant confirmation
+   emails will send from applications@ubuntuafrikasl.com.
+
+============================================================
+PART 2 — FOR DANIEL — WHAT TO CHECK / SET ON VERCEL
+============================================================
+
+Open: https://vercel.com → project ubuntu-afrika → Settings → Environment Variables
+
+Apply each variable to: Production and Preview
+(Do not set ADMIN_PASSWORD on Vercel.)
+
+Already used by the application. Confirm they exist and match:
+
+1) RESEND_API_KEY
+   Value: your Resend API key from https://resend.com/api-keys
+   Type:  Sensitive
+   Notes: Required. Without this, no emails are sent.
+
+2) EMAIL_FROM
+   Value: Ubuntu Tech Afrika <applications@ubuntuafrikasl.com>
+   Type:  Sensitive
+   Notes: Must use an address on the verified domain ubuntuafrikasl.com.
+          Do not use ubuntuafrika-sl.com (with a hyphen).
+
+3) RESEND_EMAIL_DOMAIN
+   Value: ubuntuafrikasl.com
+   Notes: Must match the domain added in Resend.
+
+4) CONTACT_TO_EMAIL
+   Value: d.salifu@ubuntuafrika.com
+   Notes: Staff inbox used if APPLICATIONS_NOTIFY_EMAIL is empty.
+
+5) APPLICATIONS_NOTIFY_EMAIL  (optional, recommended)
+   Value: the staff address that should receive “new application” alerts
+   Notes: You can list more than one, separated by commas.
+          Example: d.salifu@ubuntuafrika.com,l.nieto@ubuntuafrika.com
+
+6) NEXT_PUBLIC_SITE_URL
+   Value: https://www.ubuntuafrikasl.com
+   Notes: Used in email links. Use the live public website URL
+          (with https, no trailing slash).
+
+After HostGator DNS is saved and Resend shows Verified:
+- You do not need to redeploy for DNS itself.
+- If you changed any Vercel variable above, redeploy Production
+  (Deployments → … on the latest → Redeploy).
+
+How to confirm it worked:
+- Submit a test application with a real email you can open.
+- You should receive “Application Received” from
+  applications@ubuntuafrikasl.com.
+- Staff should receive the new-application alert at CONTACT_TO_EMAIL
+  or APPLICATIONS_NOTIFY_EMAIL.
+- Submitting still saves the application even if email is not verified yet.
+
+============================================================
+END
+============================================================

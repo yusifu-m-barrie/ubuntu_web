@@ -69,6 +69,16 @@ export function shortlistedNotifiedEvent(applicationId: string, at: string): App
   };
 }
 
+export function rejectedNotifiedEvent(applicationId: string, at: string): ApplicationHistoryEvent {
+  return {
+    id: `rejected-email:${applicationId}`,
+    at,
+    type: "REJECTED_NOTIFIED",
+    actor: "System",
+    message: "Application outcome email sent to the applicant",
+  };
+}
+
 export function hasHistoryType(history: ApplicationHistoryEvent[] | undefined, type: ApplicationHistoryEvent["type"]) {
   return Boolean(history?.some((event) => event.type === type));
 }

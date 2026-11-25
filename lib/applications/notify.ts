@@ -1,9 +1,15 @@
-import { adminNotificationEmail, applicantConfirmationEmail, applicantShortlistedEmail } from "@/lib/applications/email-templates";
+import {
+  adminNotificationEmail,
+  applicantConfirmationEmail,
+  applicantRejectedEmail,
+  applicantShortlistedEmail,
+} from "@/lib/applications/email-templates";
 import {
   adminNotifiedEvent,
   applicantNotifiedEvent,
   hasHistoryId,
   hasHistoryType,
+  rejectedNotifiedEvent,
   shortlistedNotifiedEvent,
 } from "@/lib/applications/history";
 import { adminNotifyAddresses, isDeliverableEmail, mailConfigured, sendApplicationEmail } from "@/lib/applications/mail";
@@ -106,6 +112,38 @@ export async function notifyApplicantShortlisted(record: ApplicationRecord) {
     replyTo: isDeliverableEmail(replyTo || "") ? replyTo : undefined,
     headers: { "X-Entity-Ref-ID": event.id },
     idempotencyKey: `shortlist-email/${record.id}`,
+  });
+  if (!result.sent) {
+    if (!result.skipped) logNotify(record.applicationReference, result.error);
+    return { sent: false as const, duplicate: false as const };
+  }
+  await persistNotification(record.id, event);
+  return { sent: true as const, duplicate: false as const };
+}
+
+export async function notifyApplicantRejected(record: ApplicationRecord) {
+  const event = rejectedNotifiedEvent(record.id, new Date().toISOString());
+  if (hasHistoryType(record.history, "REJECTED_NOTIFIED") || hasHistoryId(record.history, event.id)) {
+    return { sent: false as const, duplicate: true as const };
+  }
+  if (!mailConfigured()) {
+    return { sent: false as const, duplicate: false as const };
+  }
+  if (!isDeliverableEmail(record.email)) {
+    logNotify(record.applicationReference, "Applicant email address is not deliverable.");
+    return { sent: false as const, duplicate: false as const };
+  }
+
+  const template = applicantRejectedEmail(record);
+  const replyTo = adminNotifyAddresses()[0];
+  const result = await sendApplicationEmail({
+    to: record.email,
+    subject: template.subject,
+    text: template.text,
+    html: template.html,
+    replyTo: isDeliverableEmail(replyTo || "") ? replyTo : undefined,
+    headers: { "X-Entity-Ref-ID": event.id },
+    idempotencyKey: `rejected-email/${record.id}`,
   });
   if (!result.sent) {
     if (!result.skipped) logNotify(record.applicationReference, result.error);

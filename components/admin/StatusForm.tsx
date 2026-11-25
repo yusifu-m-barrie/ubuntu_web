@@ -81,6 +81,9 @@ export function StatusForm({ id, status }: { id: string; status: ApplicationStat
               {value === "SHORTLISTED"
                 ? " The applicant will receive a formal email confirming that they have been shortlisted for the next stage."
                 : ""}
+              {value === "REJECTED"
+                ? " The applicant will receive an email informing them that their application will not progress on this occasion."
+                : ""}
               {sensitive ? " This decision should be confirmed before continuing." : ""}
             </p>
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
